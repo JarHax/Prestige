@@ -1,0 +1,24 @@
+[  
+   {  
+      "modid":"prestige",
+      "name":"Prestige",
+      "description":"Adds a prestige system, which allows progress to carry on beyond worlds.",
+      "version":"${version}",
+      "mcversion":"${mcversion}",
+      "url":"",
+      "updateUrl":"",
+      "authorList":[  
+         "Darkhax",
+		 "Jaredlll08"
+      ],
+      "credits":"Darkosto",
+      "logoFile":"",
+      "screenshots":[  
+
+      ],
+      "parent":"",
+      "dependencies":[  
+
+      ]
+   }
+]
