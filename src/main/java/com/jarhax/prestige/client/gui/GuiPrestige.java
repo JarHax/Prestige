@@ -17,7 +17,7 @@ public class GuiPrestige extends GuiScreen {
     private int prevMX;
     private int prevMY;
     
-    private List<GuiObject> guiObjects = new ArrayList<>();
+    private List<GuiObject> guiObjects;
     private GuiObjectBackGround backGround;
     
     @Override
@@ -30,11 +30,6 @@ public class GuiPrestige extends GuiScreen {
         guiObjects = new ArrayList<>();
         backGround = new GuiObjectBackGround(this, left, top, guiWidth, guiHeight);
         guiObjects.add(backGround);
-        guiObjects.add(new GuiObjectTest(this, left+(mc.world.rand.nextInt(guiWidth)), top+(mc.world.rand.nextInt(guiHeight)), 20, 20));
-        guiObjects.add(new GuiObjectTest(this, left+(mc.world.rand.nextInt(guiWidth)), top+(mc.world.rand.nextInt(guiHeight)), 20, 20));
-        guiObjects.add(new GuiObjectTest(this, left+(mc.world.rand.nextInt(guiWidth)), top+(mc.world.rand.nextInt(guiHeight)), 20, 20));
-        guiObjects.add(new GuiObjectTest(this, left+(mc.world.rand.nextInt(guiWidth)), top+(mc.world.rand.nextInt(guiHeight)), 20, 20));
-    
     }
     
     @Override
