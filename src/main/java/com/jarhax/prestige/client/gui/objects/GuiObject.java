@@ -61,7 +61,7 @@ public abstract class GuiObject {
     }
 
     public void mouseClicked (int mouseX, int mouseY, int mouseButton) {
-        
+
     }
 
     public void mouseClickMove (int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
