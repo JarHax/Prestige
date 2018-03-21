@@ -1,0 +1,4 @@
+#Commands
+chat.prestige.confirmed=Confirmed Points: %d
+chat.prestige.unconfirmed=Unconfirmed Points: %d
+chat.prestige.unlocked=Unlocked rewards: %d
