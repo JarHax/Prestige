@@ -1,5 +1,12 @@
 package com.jarhax.prestige;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import com.jarhax.prestige.api.Reward;
+import com.jarhax.prestige.capability.IPrestigeData;
+import com.jarhax.prestige.capability.PrestigeDataDefault;
+import com.jarhax.prestige.capability.StoragePrestige;
 import com.jarhax.prestige.client.gui.GuiPrestige;
 
 import net.minecraft.client.Minecraft;
@@ -7,13 +14,24 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 
 @Mod(modid = "prestige", name = "Prestige", version = "@VERSION@", dependencies = "required-after:bookshelf@[2.3.523,)", certificateFingerprint = "@FINGERPRINT@")
 public class Prestige {
 
-    @Mod.EventHandler
+    public static final Map<String, Reward> REGISTRY = new HashMap<>();
+
+    @EventHandler
+    public void onPreInit (FMLPreInitializationEvent event) {
+
+        CapabilityManager.INSTANCE.register(IPrestigeData.class, new StoragePrestige(), PrestigeDataDefault::new);
+    }
+
+    @EventHandler
     public void onFMLServerStarting (FMLServerStartingEvent event) {
 
         // TODO move this to it's own class
