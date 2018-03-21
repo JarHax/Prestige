@@ -3,6 +3,9 @@ package com.jarhax.prestige;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.jarhax.prestige.api.Reward;
 import com.jarhax.prestige.capability.IPrestigeData;
 import com.jarhax.prestige.capability.PrestigeDataDefault;
@@ -20,6 +23,7 @@ import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 @Mod(modid = "prestige", name = "Prestige", version = "@VERSION@", dependencies = "required-after:bookshelf@[2.3.523,)", certificateFingerprint = "@FINGERPRINT@")
 public class Prestige {
 
+    public static final Logger LOG = LogManager.getLogger("Prestige");
     public static final Map<String, Reward> REGISTRY = new HashMap<>();
 
     @EventHandler

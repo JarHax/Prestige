@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import com.jarhax.prestige.Prestige;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.CompressedStreamTools;
 
@@ -24,7 +26,7 @@ public class GlobalPrestigeData {
 
     public static PlayerData getPlayerData (EntityPlayer player) {
 
-        return CACHE.computeIfAbsent(player.getPersistentID(), key -> new PlayerData(key));
+        return CACHE.computeIfAbsent(player.getPersistentID(), PlayerData::new);
     }
 
     public static void loadAllSavedPlayers () {
@@ -36,6 +38,7 @@ public class GlobalPrestigeData {
             if (data != null) {
 
                 CACHE.put(data.getPlayerId(), data);
+                Prestige.LOG.info("Successfully loaded data for {}. Confirmed: {} Unconfirmed: {}", data.getPlayerId().toString(), data.getConfirmed(), data.getUnconfirmed());
             }
         }
     }
@@ -50,12 +53,11 @@ public class GlobalPrestigeData {
             }
 
             catch (final IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+
+                Prestige.LOG.trace("Could not load player data from " + file.getName(), e);
             }
         }
 
-        // new PlayerData(UUID.fromString(file.getName().replace(".dat", "")));
         return null;
     }
 
@@ -64,12 +66,12 @@ public class GlobalPrestigeData {
         try {
 
             CompressedStreamTools.write(getPlayerData(player).save(), getPlayerFile(player));
+            Prestige.LOG.info("Saving data for {}.", player.getName());
         }
 
         catch (final IOException e) {
 
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Prestige.LOG.trace("Could not save data for " + player.getName(), e);
         }
     }
 
