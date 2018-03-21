@@ -8,6 +8,8 @@ import com.jarhax.prestige.capability.IPrestigeData;
 import com.jarhax.prestige.capability.PrestigeDataDefault;
 import com.jarhax.prestige.capability.StoragePrestige;
 import com.jarhax.prestige.client.gui.GuiPrestige;
+import com.jarhax.prestige.command.CommandAdd;
+import com.jarhax.prestige.data.GlobalPrestigeData;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
@@ -25,6 +27,8 @@ public class Prestige {
 
     public static final Map<String, Reward> REGISTRY = new HashMap<>();
 
+    public static final GlobalPrestigeData prestige = GlobalPrestigeData.readData().save();
+
     @EventHandler
     public void onPreInit (FMLPreInitializationEvent event) {
 
@@ -33,6 +37,8 @@ public class Prestige {
 
     @EventHandler
     public void onFMLServerStarting (FMLServerStartingEvent event) {
+
+        event.registerServerCommand(new CommandAdd());
 
         // TODO move this to it's own class
         event.registerServerCommand(new CommandBase() {
