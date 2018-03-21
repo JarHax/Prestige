@@ -1,5 +1,8 @@
 package com.jarhax.prestige.api;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import net.minecraft.item.ItemStack;
 
 public class Reward {
@@ -10,6 +13,9 @@ public class Reward {
     private final ItemStack icon;
     private final int x;
     private final int y;
+
+    private final Set<Reward> parents = new HashSet<>();
+    private final Set<Reward> children = new HashSet<>();
 
     public Reward (String identifier, String title, int x, int y, ItemStack icon, String description) {
 
@@ -64,5 +70,26 @@ public class Reward {
     public int getY () {
 
         return this.y;
+    }
+
+    public void addChild (Reward child) {
+
+        if (this.parents.contains(child)) {
+
+            throw new IllegalArgumentException(String.format("The reward %s can not be a child of %s because it is a parent of %s.", child.getIdentifier(), this.identifier, this.identifier));
+        }
+
+        this.children.add(child);
+    }
+
+    public void addParent (Reward parent) {
+
+        if (this.children.contains(parent)) {
+
+            throw new IllegalArgumentException(String.format("The reward %s can not be a parent of %s because it is a child of %s.", parent.getIdentifier(), this.identifier, this.identifier));
+        }
+
+        this.parents.add(parent);
+        parent.addChild(this);
     }
 }
