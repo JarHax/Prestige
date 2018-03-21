@@ -72,14 +72,24 @@ public class Reward {
         return this.y;
     }
 
+    public Set<Reward> getChildren () {
+
+        return this.children;
+    }
+
     public void addChild (Reward child) {
 
-        if (this.parents.contains(child)) {
+        if (this.getChildren().contains(child)) {
 
             throw new IllegalArgumentException(String.format("The reward %s can not be a child of %s because it is a parent of %s.", child.getIdentifier(), this.identifier, this.identifier));
         }
 
         this.children.add(child);
+    }
+
+    public Set<Reward> getParents () {
+
+        return this.parents;
     }
 
     public void addParent (Reward parent) {
