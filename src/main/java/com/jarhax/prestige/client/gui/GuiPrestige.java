@@ -42,9 +42,7 @@ public class GuiPrestige extends GuiScreen {
         for (final GuiObject object : this.guiObjects) {
             object.update();
         }
-        this.guiObjects.stream().filter(o -> !o.equals(this.backGround)).forEach(object -> {
-            object.setVisible(this.backGround.collides(object));
-        });
+        this.guiObjects.stream().filter(o -> !o.equals(this.backGround)).forEach(object -> object.setVisible(this.backGround.collides(object)));
     }
 
     @Override
