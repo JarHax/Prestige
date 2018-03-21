@@ -2,7 +2,8 @@ package com.jarhax.prestige.command;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
-import com.jarhax.prestige.Prestige;
+import com.jarhax.prestige.data.GlobalPrestigeData;
+import com.jarhax.prestige.data.PlayerData;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -33,8 +34,9 @@ public class CommandAdd extends CommandBase {
 
             if (player != null) {
 
-                Prestige.prestige.getPlayerData(player).add(Long.parseLong(args[1]), true);
-                Prestige.prestige.save();
+                final PlayerData data = GlobalPrestigeData.getPlayerData(player);
+                data.addConfirmed(Long.parseLong(args[1]));
+                GlobalPrestigeData.save(player);
             }
         }
     }

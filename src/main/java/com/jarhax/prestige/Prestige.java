@@ -22,10 +22,10 @@ public class Prestige {
 
     public static final Map<String, Reward> REGISTRY = new HashMap<>();
 
-    public static final GlobalPrestigeData prestige = GlobalPrestigeData.readData().save();
-
     @EventHandler
     public void onPreInit (FMLPreInitializationEvent event) {
+
+        GlobalPrestigeData.loadAllSavedPlayers();
 
         CapabilityManager.INSTANCE.register(IPrestigeData.class, new StoragePrestige(), PrestigeDataDefault::new);
     }

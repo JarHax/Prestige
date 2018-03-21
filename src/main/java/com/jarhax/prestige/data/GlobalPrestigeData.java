@@ -1,69 +1,80 @@
 package com.jarhax.prestige.data;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.annotations.Expose;
-
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.CompressedStreamTools;
 
 public class GlobalPrestigeData {
 
-    @Expose
-    private final Map<UUID, PlayerData> playerMap;
+    private static final File SAVE_DIR = new File("prestige");
+    private static final Map<UUID, PlayerData> CACHE = new HashMap<>();
 
-    public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    public static final File FILE = new File("prestige-data.json");
+    static {
 
-    public GlobalPrestigeData () {
+        if (!SAVE_DIR.exists()) {
 
-        this.playerMap = new HashMap<>();
+            SAVE_DIR.mkdirs();
+        }
     }
 
-    public static GlobalPrestigeData readData () {
+    public static PlayerData getPlayerData (EntityPlayer player) {
 
-        if (!FILE.exists()) {
+        return CACHE.computeIfAbsent(player.getPersistentID(), key -> new PlayerData(key));
+    }
 
-            new GlobalPrestigeData().save();
+    public static void loadAllSavedPlayers () {
+
+        for (final File file : SAVE_DIR.listFiles()) {
+
+            final PlayerData data = load(file);
+
+            if (data != null) {
+
+                CACHE.put(data.getPlayerId(), data);
+            }
+        }
+    }
+
+    public static PlayerData load (File file) {
+
+        if (file.exists()) {
+
+            try {
+
+                return new PlayerData(CompressedStreamTools.read(file));
+            }
+
+            catch (final IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
 
-        try (final FileReader reader = new FileReader(FILE)) {
-
-            return GSON.fromJson(reader, GlobalPrestigeData.class);
-        }
-
-        catch (final IOException e) {
-
-            e.printStackTrace();
-        }
-
+        // new PlayerData(UUID.fromString(file.getName().replace(".dat", "")));
         return null;
     }
 
-    public GlobalPrestigeData save () {
+    public static void save (EntityPlayer player) {
 
-        try (final FileWriter writer = new FileWriter(FILE)) {
+        try {
 
-            GSON.toJson(this, writer);
+            CompressedStreamTools.write(getPlayerData(player).save(), getPlayerFile(player));
         }
 
         catch (final IOException e) {
 
+            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
-        return this;
     }
 
-    public PlayerData getPlayerData (EntityPlayer player) {
+    public static File getPlayerFile (EntityPlayer player) {
 
-        return this.playerMap.computeIfAbsent(player.getPersistentID(), key -> new PlayerData());
+        return new File(SAVE_DIR, player.getUniqueID().toString() + ".dat");
     }
 }
