@@ -1,136 +1,153 @@
 package com.jarhax.prestige.client.gui;
 
-import com.google.common.collect.ImmutableList;
-import com.jarhax.prestige.client.gui.objects.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.jarhax.prestige.client.gui.objects.GuiObject;
+import com.jarhax.prestige.client.gui.objects.GuiObjectBackGround;
+
 import net.minecraft.client.gui.GuiScreen;
 
-import java.io.IOException;
-import java.util.*;
-
 public class GuiPrestige extends GuiScreen {
-    
+
     private int guiWidth;
     private int guiHeight;
     private int left;
     private int top;
-    
+
     private int prevMX;
     private int prevMY;
-    
+
     private List<GuiObject> guiObjects;
     private GuiObjectBackGround backGround;
-    
+
     @Override
-    public void initGui() {
-        guiWidth = 256;
-        guiHeight = 256;
+    public void initGui () {
+
+        this.guiWidth = 256;
+        this.guiHeight = 256;
         super.initGui();
-        left = width / 2 - guiWidth / 2;
-        top = height / 2 - guiHeight / 2;
-        guiObjects = new ArrayList<>();
-        backGround = new GuiObjectBackGround(this, left, top, guiWidth, guiHeight);
-        guiObjects.add(backGround);
+        this.left = this.width / 2 - this.guiWidth / 2;
+        this.top = this.height / 2 - this.guiHeight / 2;
+        this.guiObjects = new ArrayList<>();
+        this.backGround = new GuiObjectBackGround(this, this.left, this.top, this.guiWidth, this.guiHeight);
+        this.guiObjects.add(this.backGround);
     }
-    
+
     @Override
-    public void updateScreen() {
+    public void updateScreen () {
+
         super.updateScreen();
-        for(GuiObject object : guiObjects) {
+        for (final GuiObject object : this.guiObjects) {
             object.update();
         }
-        guiObjects.stream().filter(o -> !o.equals(backGround)).forEach(object -> {
-            object.setVisible(backGround.collides(object));
+        this.guiObjects.stream().filter(o -> !o.equals(this.backGround)).forEach(object -> {
+            object.setVisible(this.backGround.collides(object));
         });
     }
-    
+
     @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        for(int i = 0; i < guiObjects.size(); i++) {
-            GuiObject object = guiObjects.get(i);
-            if(object.isVisible()) {
-                object.draw(left, top, mouseX, mouseY, partialTicks);
+    public void drawScreen (int mouseX, int mouseY, float partialTicks) {
+
+        for (int i = 0; i < this.guiObjects.size(); i++) {
+            final GuiObject object = this.guiObjects.get(i);
+            if (object.isVisible()) {
+                object.draw(this.left, this.top, mouseX, mouseY, partialTicks);
             }
         }
-        
+
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
-    
+
     @Override
-    public void drawBackground(int tint) {
+    public void drawBackground (int tint) {
+
         super.drawBackground(tint);
     }
-    
+
     @Override
-    public void handleMouseInput() throws IOException {
+    public void handleMouseInput () throws IOException {
+
         super.handleMouseInput();
     }
-    
+
     @Override
-    public void handleKeyboardInput() throws IOException {
+    public void handleKeyboardInput () throws IOException {
+
         super.handleKeyboardInput();
     }
-    
+
     @Override
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+    protected void mouseClicked (int mouseX, int mouseY, int mouseButton) throws IOException {
+
         super.mouseClicked(mouseX, mouseY, mouseButton);
-        prevMX = mouseX;
-        prevMY = mouseY;
-        for(GuiObject object : guiObjects) {
+        this.prevMX = mouseX;
+        this.prevMY = mouseY;
+        for (final GuiObject object : this.guiObjects) {
             object.mouseClicked(mouseX, mouseY, mouseButton);
         }
-        
+
     }
-    
+
     @Override
-    protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+    protected void mouseClickMove (int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-        
-        for(GuiObject object : guiObjects) {
+
+        for (final GuiObject object : this.guiObjects) {
             object.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
         }
-        
-        prevMX = mouseX;
-        prevMY = mouseY;
-        
+
+        this.prevMX = mouseX;
+        this.prevMY = mouseY;
+
     }
-    
+
     @Override
-    protected void mouseReleased(int mouseX, int mouseY, int state) {
+    protected void mouseReleased (int mouseX, int mouseY, int state) {
+
         super.mouseReleased(mouseX, mouseY, state);
-        prevMX = -1;
-        prevMY = -1;
-        for(GuiObject object : guiObjects) {
+        this.prevMX = -1;
+        this.prevMY = -1;
+        for (final GuiObject object : this.guiObjects) {
             object.mouseReleased(mouseX, mouseY, state);
         }
-        
-        
+
     }
-    
-    public int getPrevMX() {
-        return prevMX;
+
+    public int getPrevMX () {
+
+        return this.prevMX;
     }
-    
-    public int getPrevMY() {
-        return prevMY;
+
+    public int getPrevMY () {
+
+        return this.prevMY;
     }
-    
-    public int getGuiWidth() {
-        return guiWidth;
+
+    public int getGuiWidth () {
+
+        return this.guiWidth;
     }
-    
-    public int getGuiHeight() {
-        return guiHeight;
+
+    public int getGuiHeight () {
+
+        return this.guiHeight;
     }
-    
-    public int getLeft() {
-        return left;
+
+    public int getLeft () {
+
+        return this.left;
     }
-    
-    public int getTop() {
-        return top;
+
+    public int getTop () {
+
+        return this.top;
     }
-    
-    public List<GuiObject> getList() {
-        return guiObjects;
+
+    public List<GuiObject> getList () {
+
+        return this.guiObjects;
     }
 }
