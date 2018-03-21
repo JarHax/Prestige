@@ -24,7 +24,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 public class Prestige {
 
     public static final Logger LOG = LogManager.getLogger("Prestige");
-    public static final NetworkHandler NETWORK = new NetworkHandler("prestige");   
+    public static final NetworkHandler NETWORK = new NetworkHandler("prestige");
     public static final Map<String, Reward> REGISTRY = new HashMap<>();
 
     @EventHandler

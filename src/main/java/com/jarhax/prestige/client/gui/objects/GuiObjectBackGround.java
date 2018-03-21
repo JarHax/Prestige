@@ -16,7 +16,6 @@ public class GuiObjectBackGround extends GuiObject {
 
     private float offsetAltX;
     private float offsetAltY;
-    
 
     public GuiObjectBackGround (GuiPrestige parent, int x, int y, int width, int height) {
 
@@ -27,22 +26,23 @@ public class GuiObjectBackGround extends GuiObject {
 
     @Override
     public void draw (int left, int top, int mouseX, int mouseY, float partialTicks) {
+
         if (this.visible) {
             this.mc.getTextureManager().bindTexture(BACKGROUND);
             RenderUtils.drawTexturedModalRect(this.getX(), this.getY(), this.offsetX, this.offsetY, this.getWidth(), this.getHeight());
-            
-            
-            GlStateManager.scale(2,2,2);
-            GlStateManager.translate(getX()/2, getY()/2,0);
+
+            GlStateManager.scale(2, 2, 2);
+            GlStateManager.translate(this.getX() / 2, this.getY() / 2, 0);
             this.mc.getTextureManager().bindTexture(BACKGROUND_ALT);
             GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_COLOR, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR);
-            RenderUtils.drawTexturedModalRect(0, 0, this.offsetAltX, this.offsetAltY, this.getWidth()/2, this.getHeight()/2);
-            GlStateManager.translate(-getX()/2, -getY()/2,0);
-            GlStateManager.scale(1,1,1);
+            RenderUtils.drawTexturedModalRect(0, 0, this.offsetAltX, this.offsetAltY, this.getWidth() / 2, this.getHeight() / 2);
+            GlStateManager.translate(-this.getX() / 2, -this.getY() / 2, 0);
+            GlStateManager.scale(1, 1, 1);
         }
     }
-    
-    public float remap(float value, float from1, float to1, float from2, float to2){
+
+    public float remap (float value, float from1, float to1, float from2, float to2) {
+
         return from2 + (value - from1) * (to2 - from2) / (to1 - from1);
     }
 

@@ -5,20 +5,20 @@ import net.minecraft.command.ICommandSender;
 
 public class CommandPrestige extends CommandTree {
 
-    public CommandPrestige() {
-        
+    public CommandPrestige () {
+
         this.addSubcommand(new CommandAdd());
         this.addSubcommand(new CommandRemove());
         this.addSubcommand(new CommandInfo());
         this.addSubcommand(new CommandOpen());
     }
-    
+
     @Override
     public int getRequiredPermissionLevel () {
 
         return 0;
     }
-    
+
     @Override
     public String getName () {
 
