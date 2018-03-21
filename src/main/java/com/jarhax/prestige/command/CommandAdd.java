@@ -35,7 +35,7 @@ public class CommandAdd extends CommandBase {
             if (player != null) {
 
                 final PlayerData data = GlobalPrestigeData.getPlayerData(player);
-                data.addConfirmed(Long.parseLong(args[1]));
+                data.addUnconfirmed(Long.parseLong(args[1]));
                 GlobalPrestigeData.save(player);
             }
         }
