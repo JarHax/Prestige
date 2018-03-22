@@ -5,13 +5,13 @@ import org.apache.commons.lang3.math.NumberUtils;
 import com.jarhax.prestige.data.GlobalPrestigeData;
 import com.jarhax.prestige.data.PlayerData;
 
-import net.minecraft.command.CommandBase;
+import net.darkhax.bookshelf.command.Command;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 
-public class CommandRemove extends CommandBase {
+public class CommandRemove extends Command {
 
     @Override
     public String getName () {
