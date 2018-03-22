@@ -1,11 +1,19 @@
 package com.jarhax.prestige.client.gui;
 
 import com.jarhax.prestige.client.gui.objects.*;
+import com.jarhax.prestige.client.utils.RenderUtils;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.ResourceLocation;
+import org.lwjgl.Sys;
+import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
 import java.util.*;
+
+import static org.lwjgl.opengl.GL11.GL_STACK_OVERFLOW;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 
 public class GuiPrestige extends GuiScreen {
     
@@ -22,6 +30,8 @@ public class GuiPrestige extends GuiScreen {
     
     private GuiObject selectedObject;
     private final boolean editing;
+    
+    private Map<GuiObject, List<GuiObject>> connections = new HashMap<>();
     
     public GuiPrestige(boolean editing) {
         this.editing = editing;
@@ -66,15 +76,42 @@ public class GuiPrestige extends GuiScreen {
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         
+        GlStateManager.pushMatrix();
+        backGround.draw(left, top, mouseX, mouseY, partialTicks);
+        mc.getTextureManager().bindTexture(new ResourceLocation("prestige", "textures/gui/gui_prestige_line.png"));
+        for(Map.Entry<GuiObject, List<GuiObject>> entry : connections.entrySet()) {
+            GuiObject start = entry.getKey();
+            for(GuiObject end : entry.getValue()) {
+                GlStateManager.pushMatrix();
+                double angle = Math.atan2(end.getY() - start.getY(), end.getX() - start.getX()) * 180 / Math.PI;
+//                angle = System.currentTimeMillis();
+                GL11.glTranslated(start.getX() + (start.getWidth()/2), start.getY() + (start.getHeight()/2),0);
+                GL11.glRotated(angle, 0,0,1);
+                RenderUtils.drawTexturedModalRect(0, 0, RenderUtils.remap((float) (System.nanoTime()/1000000000.0),1,0,0,16),0, (float) Math.sqrt((end.getX()-start.getX())*(end.getX()-start.getX()) + (end.getY()-start.getY()) * (end.getY()-start.getY())),4);
+                
+                
+                GL11.glTranslated(-(start.getX() + (start.getWidth()/2)), -(start.getY() + (start.getHeight()/2)),0);
+                GlStateManager.popMatrix();
+//
+            }
+        }
         for(int i = 0; i < this.guiObjects.size(); i++) {
             final GuiObject object = this.guiObjects.get(i);
+            if(object.equals(backGround)){
+                continue;
+            }
             if(object.isVisible()) {
                 if(object.equals(selectedObject)) {
                     GlStateManager.color(0, 1, 1, 1);
                 }
                 object.draw(this.left, this.top, mouseX, mouseY, partialTicks);
+                if(object.equals(selectedObject)) {
+                    GlStateManager.color(1, 1, 1, 1);
+                }
             }
         }
+        GlStateManager.popMatrix();
+        
         
         if(editing) {
             fontRenderer.drawString("EDITING MODE!", left + 5, top + 5, 0xFFFF0000, false);
@@ -107,16 +144,17 @@ public class GuiPrestige extends GuiScreen {
         super.mouseClicked(mouseX, mouseY, mouseButton);
         
         if(editing) {
-            if(mouseButton == 2) {
-                GuiObject collided = null;
-                for(GuiObject object : guiObjects) {
-                    if(object.equals(backGround)) {
-                        continue;
-                    }
-                    if(object.collides(mouseX, mouseY, mouseX, mouseY)) {
-                        collided = object;
-                    }
+            GuiObject collided = null;
+            for(GuiObject object : guiObjects) {
+                if(object.equals(backGround)) {
+                    continue;
                 }
+                if(object.collides(mouseX, mouseY, mouseX, mouseY)) {
+                    collided = object;
+                }
+            }
+            
+            if(mouseButton == 2) {
                 if(collided == null) {
                     GuiObjectTest e = new GuiObjectTest(this, mouseX - 16, mouseY - 16);
                     getList().add(e);
@@ -124,15 +162,25 @@ public class GuiPrestige extends GuiScreen {
                 } else {
                     selectedObject = collided;
                 }
-                
-            }else if(mouseButton == 1){
+            } else if(mouseButton == 1) {
                 selectedObject = null;
+            } else if(mouseButton == 0) {
+                if(collided != null && selectedObject!=null) {
+                    if(!collided.equals(selectedObject)) {
+                        List<GuiObject> list = connections.getOrDefault(selectedObject, new ArrayList<>());
+                        list.add(collided);
+                        connections.put(selectedObject, list);
+                    }
+                }
             }
         }
         this.prevMX = mouseX;
         this.prevMY = mouseY;
-        for(final GuiObject object : this.guiObjects) {
-            object.mouseClicked(mouseX, mouseY, mouseButton);
+        if(mouseButton == 0) {
+            
+            for(final GuiObject object : this.guiObjects) {
+                object.mouseClicked(mouseX, mouseY, mouseButton);
+            }
         }
         
     }

@@ -32,7 +32,7 @@ public class GuiObjectBackGround extends GuiObject {
         if(this.visible) {
             this.mc.getTextureManager().bindTexture(BACKGROUND);
             RenderUtils.drawTexturedModalRect(this.getX() + 2, this.getY() + 2, this.offsetX, this.offsetY, this.getWidth() - 2, this.getHeight() - 2);
-            
+
             GlStateManager.pushMatrix();
             GlStateManager.scale(2, 2, 2);
             this.mc.getTextureManager().bindTexture(BACKGROUND_ALT);
@@ -42,17 +42,12 @@ public class GuiObjectBackGround extends GuiObject {
             GlStateManager.disableBlend();
             GlStateManager.scale(1, 1, 1);
             GlStateManager.popMatrix();
-            
+
             GlStateManager.pushMatrix();
             this.mc.getTextureManager().bindTexture(BACKGROUND_BORDER);
             RenderUtils.drawTexturedModalRect(this.getX(), this.getY(), 0, 0, this.getWidth(), this.getHeight());
             GlStateManager.popMatrix();
         }
-    }
-    
-    public float remap(float value, float from1, float to1, float from2, float to2) {
-        
-        return from2 + (value - from1) * (to2 - from2) / (to1 - from1);
     }
     
     @Override
