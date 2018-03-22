@@ -11,11 +11,16 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class PacketOpenPrestigeGUI extends SerializableMessage {
 
+    public boolean editing;
     public PacketOpenPrestigeGUI () {
 
         // Empty constructor for forge's system
     }
-
+    
+    public PacketOpenPrestigeGUI(boolean editing) {
+        this.editing = editing;
+    }
+    
     @Override
     @SideOnly(Side.CLIENT)
     public IMessage handleMessage (MessageContext context) {
@@ -23,7 +28,7 @@ public class PacketOpenPrestigeGUI extends SerializableMessage {
         // Move logic off the packet thread
         Minecraft.getMinecraft().addScheduledTask( () -> {
 
-            Minecraft.getMinecraft().displayGuiScreen(new GuiPrestige());
+            Minecraft.getMinecraft().displayGuiScreen(new GuiPrestige(editing));
         });
 
         return null;
