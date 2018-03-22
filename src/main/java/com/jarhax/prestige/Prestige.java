@@ -10,6 +10,7 @@ import com.jarhax.prestige.api.Reward;
 import com.jarhax.prestige.command.CommandPrestige;
 import com.jarhax.prestige.data.GlobalPrestigeData;
 import com.jarhax.prestige.data.PlayerData;
+import com.jarhax.prestige.packet.PacketOpenPrestigeGUI;
 import com.jarhax.prestige.packet.PacketSyncPrestige;
 
 import net.darkhax.bookshelf.BookshelfRegistry;
@@ -41,6 +42,7 @@ public class Prestige {
     public void onPreInit (FMLPreInitializationEvent event) {
 
         NETWORK.register(PacketSyncPrestige.class, Side.CLIENT);
+        NETWORK.register(PacketOpenPrestigeGUI.class, Side.CLIENT);
         BookshelfRegistry.addCommand(new CommandPrestige());
     }
 
