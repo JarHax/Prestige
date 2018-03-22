@@ -13,17 +13,17 @@ import net.minecraft.util.text.TextComponentTranslation;
 public class CommandOpen extends Command {
 
     @Override
-    public String getName () {
-
+    public String getName() {
+        
         return "open";
     }
-
+    
     @Override
     public String getUsage (ICommandSender sender) {
 
         return "/prestige open [player]";
     }
-
+    
     @Override
     public void execute (MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
 

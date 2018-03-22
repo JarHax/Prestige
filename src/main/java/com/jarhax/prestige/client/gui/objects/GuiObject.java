@@ -1,7 +1,5 @@
 package com.jarhax.prestige.client.gui.objects;
 
-import java.awt.Rectangle;
-
 import com.jarhax.prestige.client.gui.GuiPrestige;
 
 import net.minecraft.client.Minecraft;
@@ -20,6 +18,8 @@ public abstract class GuiObject {
     protected float y;
     protected int width;
     protected int height;
+    
+    protected boolean alwaysVisible;
 
     protected final GuiPrestige parent;
 
@@ -38,7 +38,6 @@ public abstract class GuiObject {
     }
 
     public boolean collides (GuiObject other) {
-
         return this.collides(other.getX(), other.getY(), other.getX() + other.getWidth(), other.getY() + other.getHeight());
     }
 
@@ -137,5 +136,13 @@ public abstract class GuiObject {
     public GuiPrestige getParent () {
 
         return this.parent;
+    }
+    
+    public boolean isAlwaysVisible() {
+        return alwaysVisible;
+    }
+    
+    public void setAlwaysVisible(boolean alwaysVisible) {
+        this.alwaysVisible = alwaysVisible;
     }
 }
