@@ -3,3 +3,5 @@ chat.prestige.confirmed=Prestige Points: %d
 chat.prestige.unlocked=Unlocked rewards: %d
 chat.prestige.hassource.sender=%s already has prestige points for source %s.
 chat.prestige.hassource.reciever=You have already recieved prestige for %s.
+chat.prestige.added.sender=%s gained %d prestige points!
+chat.prestige.added.reciever=You gained %d prestige points!

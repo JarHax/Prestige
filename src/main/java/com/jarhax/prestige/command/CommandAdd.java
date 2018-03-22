@@ -10,7 +10,9 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 
 public class CommandAdd extends CommandBase {
 
@@ -44,12 +46,14 @@ public class CommandAdd extends CommandBase {
                     // executing.
                     if (data.hasSource(args[2])) {
 
+                        // Send the sender an error message.
                         if (sender != player) {
 
-                            sender.sendMessage(new TextComponentTranslation("chat.prestige.hassource.sender", player.getName(), args[2]));
+                            sender.sendMessage(new TextComponentTranslation("chat.prestige.hassource.sender", player.getName(), args[2]).setStyle(new Style().setColor(TextFormatting.RED)));
                         }
 
-                        sender.sendMessage(new TextComponentTranslation("chat.prestige.hassource.reciever", args[2]));
+                        // Send the player their error message.
+                        sender.sendMessage(new TextComponentTranslation("chat.prestige.hassource.reciever", args[2]).setStyle(new Style().setColor(TextFormatting.RED)));
                         return;
                     }
 
@@ -57,8 +61,18 @@ public class CommandAdd extends CommandBase {
                     data.addSource(args[2]);
                 }
 
+                // Add points to the players data and save.
                 data.addPrestige(Long.parseLong(args[1]));
                 GlobalPrestigeData.save(player);
+
+                // Send the sender a confirmation message.
+                if (sender != player) {
+
+                    sender.sendMessage(new TextComponentTranslation("chat.prestige.added.sender", player.getName(), args[1]).setStyle(new Style().setColor(TextFormatting.GREEN)));
+                }
+
+                // Send the player a confirmation message.
+                sender.sendMessage(new TextComponentTranslation("chat.prestige.added.reciever", args[1]).setStyle(new Style().setColor(TextFormatting.GREEN)));
             }
         }
     }
