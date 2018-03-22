@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.jarhax.prestige.client.gui.objects.GuiObject;
-import com.jarhax.prestige.client.gui.objects.GuiObjectBackGround;
+import com.jarhax.prestige.client.gui.objects.*;
 
 import net.minecraft.client.gui.GuiScreen;
 
@@ -33,6 +32,8 @@ public class GuiPrestige extends GuiScreen {
         this.guiObjects = new ArrayList<>();
         this.backGround = new GuiObjectBackGround(this, this.left, this.top, this.guiWidth, this.guiHeight);
         this.guiObjects.add(this.backGround);
+        this.guiObjects.add(new GuiObjectTest(this, left + 20,top + 20,32,32));
+    
     }
 
     @Override
@@ -42,7 +43,17 @@ public class GuiPrestige extends GuiScreen {
         for (final GuiObject object : this.guiObjects) {
             object.update();
         }
-        this.guiObjects.stream().filter(o -> !o.equals(this.backGround)).forEach(object -> object.setVisible(this.backGround.collides(object)));
+        this.guiObjects.stream().filter(o -> !o.equals(this.backGround)).forEach(object -> object.setVisible(true));
+        for(GuiObject object : guiObjects) {
+            if(object.equals(backGround)){
+                continue;
+            }
+            if(backGround.collides(object)){
+                object.setVisible(true);
+            }else{
+                object.setVisible(false);
+            }
+        }
     }
 
     @Override

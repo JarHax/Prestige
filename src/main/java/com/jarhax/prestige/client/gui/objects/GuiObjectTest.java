@@ -7,15 +7,11 @@ import net.minecraft.util.ResourceLocation;
 
 public class GuiObjectTest extends GuiObject {
 
-    private static final ResourceLocation BACKGROUND = new ResourceLocation("prestige", "textures/gui/gui_prestige_background1.png");
-    private int offsetX;
-    private int offsetY;
+    private static final ResourceLocation BACKGROUND = new ResourceLocation("prestige", "textures/gui/gui_prestige_icons.png");
 
     public GuiObjectTest (GuiPrestige parent, int x, int y, int width, int height) {
 
         super(parent, x, y, width, height);
-        this.offsetX = x;
-        this.offsetY = y;
     }
 
     @Override
@@ -28,7 +24,7 @@ public class GuiObjectTest extends GuiObject {
     public void draw (int left, int top, int mouseX, int mouseY, float partialTicks) {
 
         this.mc.getTextureManager().bindTexture(BACKGROUND);
-        RenderUtils.drawTexturedModalRect(this.getX(), this.getY(), this.offsetX, this.offsetY, this.getWidth(), this.getHeight());
+        RenderUtils.drawTexturedModalRect(this.getX(), this.getY(), 0, 0, this.getWidth(), this.getHeight());
     }
 
     @Override
@@ -41,11 +37,8 @@ public class GuiObjectTest extends GuiObject {
     public void mouseClickMove (int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
 
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-        this.x += this.getParent().getPrevMX() - mouseX;
-        this.y += this.getParent().getPrevMY() - mouseY;
-        this.offsetX = this.x * 2;
-        this.offsetY = this.y * 2;
-
+        this.x += (this.getParent().getPrevMX() - mouseX)/1.5;
+        this.y += (this.getParent().getPrevMY() - mouseY)/1.5;
     }
 
     @Override

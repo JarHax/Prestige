@@ -6,7 +6,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 
 public class RenderUtils {
 
-    public static void drawTexturedModalRect (int x, int y, float textureX, float textureY, int width, int height) {
+    public static void drawTexturedModalRect (float x, float y, float textureX, float textureY, int width, int height) {
 
         final Tessellator tessellator = Tessellator.getInstance();
         final BufferBuilder bufferbuilder = tessellator.getBuffer();

@@ -13,11 +13,11 @@ public abstract class GuiObject {
     /**
      * Location relative to the parent gui's left
      */
-    protected int x;
+    protected float x;
     /**
      * Location relative to the parent gui's top
      */
-    protected int y;
+    protected float y;
     protected int width;
     protected int height;
 
@@ -39,15 +39,17 @@ public abstract class GuiObject {
 
     public boolean collides (GuiObject other) {
 
-        return this.collides(other.getX(), other.getY(), other.getWidth(), other.getHeight());
+        return this.collides(other.getX(), other.getY(), other.getX() + other.getWidth(), other.getY() + other.getHeight());
     }
 
-    public boolean collides (int x1, int y1, int x2, int y2) {
+    public boolean collides (float x1, float y1, float x2, float y2) {
 
-        final Rectangle rect = new Rectangle(x1, y1, x2, y2);
-        final Rectangle rect1 = new Rectangle(this.x, this.y, this.width, this.height);
-        // TODO make this use custom code instead of Rectangle
-        return rect.intersects(rect1);
+        if(x2 > x && x1 < x+width){
+            if(y2 > y && y1 < y+height){
+                return true;
+            }
+        }
+        return false;
     }
 
     public void update () {
@@ -92,22 +94,22 @@ public abstract class GuiObject {
         this.enabled = enabled;
     }
 
-    public int getX () {
+    public float getX () {
 
         return this.x;
     }
 
-    public void setX (int x) {
+    public void setX (float x) {
 
         this.x = x;
     }
 
-    public int getY () {
+    public float getY () {
 
         return this.y;
     }
 
-    public void setY (int y) {
+    public void setY (float y) {
 
         this.y = y;
     }
