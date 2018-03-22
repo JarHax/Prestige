@@ -2,13 +2,13 @@ package com.jarhax.prestige.command;
 
 import com.jarhax.prestige.client.gui.GuiPrestige;
 
+import net.darkhax.bookshelf.command.Command;
 import net.minecraft.client.Minecraft;
-import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
 
-public class CommandOpen extends CommandBase {
+public class CommandOpen extends Command {
 
     @Override
     public String getName () {

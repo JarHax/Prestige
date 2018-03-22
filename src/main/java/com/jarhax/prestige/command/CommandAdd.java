@@ -5,7 +5,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import com.jarhax.prestige.data.GlobalPrestigeData;
 import com.jarhax.prestige.data.PlayerData;
 
-import net.minecraft.command.CommandBase;
+import net.darkhax.bookshelf.command.Command;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
@@ -14,7 +14,7 @@ import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
-public class CommandAdd extends CommandBase {
+public class CommandAdd extends Command {
 
     @Override
     public String getName () {
