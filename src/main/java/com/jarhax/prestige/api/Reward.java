@@ -13,11 +13,12 @@ public class Reward {
     private final ItemStack icon;
     private final int x;
     private final int y;
+    private final int cost;
 
     private final Set<Reward> parents = new HashSet<>();
     private final Set<Reward> children = new HashSet<>();
 
-    public Reward (String identifier, String title, int x, int y, ItemStack icon, String description) {
+    public Reward (String identifier, String title, int x, int y, int cost, ItemStack icon, String description) {
 
         if (identifier == null || identifier.isEmpty()) {
 
@@ -40,6 +41,7 @@ public class Reward {
         this.icon = icon;
         this.x = x;
         this.y = y;
+        this.cost = cost;
     }
 
     public String getIdentifier () {
@@ -70,6 +72,11 @@ public class Reward {
     public int getY () {
 
         return this.y;
+    }
+
+    public int getCost () {
+
+        return this.cost;
     }
 
     public Set<Reward> getChildren () {

@@ -10,6 +10,7 @@ import com.jarhax.prestige.api.Reward;
 import com.jarhax.prestige.command.CommandPrestige;
 import com.jarhax.prestige.data.GlobalPrestigeData;
 import com.jarhax.prestige.data.PlayerData;
+import com.jarhax.prestige.packet.PacketAttemptPurchase;
 import com.jarhax.prestige.packet.PacketOpenPrestigeGUI;
 import com.jarhax.prestige.packet.PacketSyncPrestige;
 
@@ -43,7 +44,9 @@ public class Prestige {
 
         NETWORK.register(PacketSyncPrestige.class, Side.CLIENT);
         NETWORK.register(PacketOpenPrestigeGUI.class, Side.CLIENT);
+        NETWORK.register(PacketAttemptPurchase.class, Side.SERVER);
         BookshelfRegistry.addCommand(new CommandPrestige());
+
     }
 
     @EventHandler

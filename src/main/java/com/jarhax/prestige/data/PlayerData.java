@@ -154,4 +154,27 @@ public class PlayerData {
 
         return this.playerId.toString() + ".dat";
     }
+
+    public boolean hasReward (Reward reward) {
+
+        return this.getUnlockedRewards().contains(reward);
+    }
+
+    public boolean canPurchase (Reward reward) {
+
+        return reward != null && this.prestige >= reward.getCost() && !this.hasReward(reward) && this.hasRequiredRewards(reward);
+    }
+
+    public boolean hasRequiredRewards (Reward reward) {
+
+        for (final Reward parent : reward.getParents()) {
+
+            if (!this.hasReward(parent)) {
+
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
