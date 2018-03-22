@@ -10,7 +10,9 @@ public class GuiObjectBackGround extends GuiObject {
 
     private static final ResourceLocation BACKGROUND = new ResourceLocation("prestige", "textures/gui/gui_prestige_background.png");
     private static final ResourceLocation BACKGROUND_ALT = new ResourceLocation("prestige", "textures/gui/gui_prestige_background_alt.png");
-
+    private static final ResourceLocation BACKGROUND_BORDER = new ResourceLocation("prestige", "textures/gui/gui_prestige_background_border.png");
+    
+    
     private float offsetX;
     private float offsetY;
 
@@ -29,15 +31,22 @@ public class GuiObjectBackGround extends GuiObject {
 
         if (this.visible) {
             this.mc.getTextureManager().bindTexture(BACKGROUND);
-            RenderUtils.drawTexturedModalRect(this.getX(), this.getY(), this.offsetX, this.offsetY, this.getWidth(), this.getHeight());
+            RenderUtils.drawTexturedModalRect(this.getX()+2, this.getY()+2, this.offsetX, this.offsetY, this.getWidth()-2, this.getHeight()-2);
 
+            GlStateManager.pushMatrix();
             GlStateManager.scale(2, 2, 2);
-            GlStateManager.translate(this.getX() / 2, this.getY() / 2, 0);
             this.mc.getTextureManager().bindTexture(BACKGROUND_ALT);
-            GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_COLOR, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR);
-            RenderUtils.drawTexturedModalRect(0, 0, this.offsetAltX, this.offsetAltY, this.getWidth() / 2, this.getHeight() / 2);
-            GlStateManager.translate(-this.getX() / 2, -this.getY() / 2, 0);
+            GlStateManager.enableBlend();
+            GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR);
+            RenderUtils.drawTexturedModalRect((this.getX()+2) / 2, (this.getY()+2) / 2, this.offsetAltX, this.offsetAltY, (this.getWidth()-2) / 2, (this.getHeight()-2) / 2);
+            GlStateManager.disableBlend();
             GlStateManager.scale(1, 1, 1);
+            GlStateManager.popMatrix();
+    
+            GlStateManager.pushMatrix();
+            this.mc.getTextureManager().bindTexture(BACKGROUND_BORDER);
+            RenderUtils.drawTexturedModalRect(this.getX(), this.getY(), 0, 0, this.getWidth(), this.getHeight());
+            GlStateManager.popMatrix();
         }
     }
 
