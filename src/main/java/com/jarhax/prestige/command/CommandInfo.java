@@ -36,8 +36,7 @@ public class CommandInfo extends Command {
         if (sender instanceof EntityPlayer) {
 
             final PlayerData data = GlobalPrestigeData.getPlayerData((EntityPlayer) sender);
-            sender.sendMessage(new TextComponentTranslation("chat.prestige.confirmed", data.getConfirmed()));
-            sender.sendMessage(new TextComponentTranslation("chat.prestige.unconfirmed", data.getUnconfirmed()));
+            sender.sendMessage(new TextComponentTranslation("chat.prestige.confirmed", data.getPrestige()));
             sender.sendMessage(new TextComponentTranslation("chat.prestige.unlocked", data.getUnlockedRewards().size()));
         }
     }

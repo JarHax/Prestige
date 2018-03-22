@@ -1,8 +1,10 @@
 package com.jarhax.prestige.data;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 
 import com.jarhax.prestige.Prestige;
 import com.jarhax.prestige.api.Reward;
@@ -16,14 +18,14 @@ import net.minecraftforge.common.util.Constants.NBT;
 public class PlayerData {
 
     private static final String TAG_OWNER = "PlayerId";
-    private static final String TAG_CONFIRMED = "Confirmed";
-    private static final String TAG_UNCONFIRMED = "Unconfirmed";
+    private static final String TAG_CONFIRMED = "Prestige";
     private static final String TAG_UNLOCKED = "Unlocked";
+    private static final String TAG_SOURCES = "Sources";
 
     private UUID playerId;
-    private long confirmed;
-    private long unconfirmed;
-    private Set<Reward> unlockedRewards;
+    private long prestige;
+    private final Set<Reward> unlockedRewards;
+    private final Set<String> sources;
 
     public PlayerData (EntityPlayer player) {
 
@@ -33,29 +35,17 @@ public class PlayerData {
     public PlayerData (UUID id) {
 
         this.playerId = id;
-        this.confirmed = 0;
-        this.unconfirmed = 0;
+        this.prestige = 0;
         this.unlockedRewards = new HashSet<>();
+        this.sources = new HashSet<>();
     }
 
     public PlayerData (NBTTagCompound tag) {
 
         this.playerId = tag.getUniqueId(TAG_OWNER);
-        this.confirmed = tag.getLong(TAG_CONFIRMED);
-        this.unconfirmed = tag.getLong(TAG_UNCONFIRMED);
-        this.unlockedRewards = new HashSet<>();
-
-        final NBTTagList tagList = tag.getTagList(TAG_UNLOCKED, NBT.TAG_STRING);
-
-        for (int index = 0; index < tagList.tagCount(); index++) {
-
-            final Reward reward = Prestige.REGISTRY.get(tagList.getStringTagAt(index));
-
-            if (reward != null) {
-
-                this.unlockedRewards.add(reward);
-            }
-        }
+        this.prestige = tag.getLong(TAG_CONFIRMED);
+        this.unlockedRewards = (Set<Reward>) readCollection(new HashSet<Reward>(), tag.getTagList(TAG_UNLOCKED, NBT.TAG_STRING), Prestige.REGISTRY::get);
+        this.sources = (Set<String>) readCollection(new HashSet<String>(), tag.getTagList(TAG_SOURCES, NBT.TAG_STRING), string -> string);
     }
 
     public NBTTagCompound save () {
@@ -63,19 +53,36 @@ public class PlayerData {
         final NBTTagCompound tag = new NBTTagCompound();
 
         tag.setUniqueId(TAG_OWNER, this.playerId);
-        tag.setLong(TAG_CONFIRMED, this.confirmed);
-        tag.setLong(TAG_UNCONFIRMED, this.unconfirmed);
+        tag.setLong(TAG_CONFIRMED, this.prestige);
+        tag.setTag(TAG_UNLOCKED, writeCollection(this.unlockedRewards, Reward::getIdentifier));
+        tag.setTag(TAG_SOURCES, writeCollection(this.sources, string -> string));
+
+        return tag;
+    }
+
+    // TODO put in Bookshelf
+    public static <T extends Object> Collection<T> readCollection (Collection<T> collection, NBTTagList list, Function<String, T> func) {
+
+        for (int index = 0; index < list.tagCount(); index++) {
+
+            final String string = list.getStringTagAt(index);
+            collection.add(func.apply(string));
+        }
+
+        return collection;
+    }
+
+    // TODO put in bookshelf
+    public static <T extends Object> NBTTagList writeCollection (Collection<T> collection, Function<T, String> func) {
 
         final NBTTagList tagList = new NBTTagList();
 
-        for (final Reward reward : this.unlockedRewards) {
+        for (final T t : collection) {
 
-            tagList.appendTag(new NBTTagString(reward.getIdentifier()));
+            tagList.appendTag(new NBTTagString(func.apply(t)));
         }
 
-        tag.setTag(TAG_UNLOCKED, tagList);
-
-        return tag;
+        return tagList;
     }
 
     public UUID getPlayerId () {
@@ -88,44 +95,24 @@ public class PlayerData {
         this.playerId = playerId;
     }
 
-    public long getConfirmed () {
+    public long getPrestige () {
 
-        return this.confirmed;
+        return this.prestige;
     }
 
-    public void setConfirmed (long confirmed) {
+    public void setPrestige (long confirmed) {
 
-        this.confirmed = confirmed;
+        this.prestige = confirmed;
     }
 
-    public void addConfirmed (long amount) {
+    public void addPrestige (long amount) {
 
-        this.confirmed += amount;
+        this.prestige += amount;
     }
 
-    public void removeConfirmed (long amount) {
+    public void removePrestige (long amount) {
 
-        this.confirmed -= amount;
-    }
-
-    public long getUnconfirmed () {
-
-        return this.unconfirmed;
-    }
-
-    public void setUnconfirmed (long unconfirmed) {
-
-        this.unconfirmed = unconfirmed;
-    }
-
-    public void addUnconfirmed (long amount) {
-
-        this.unconfirmed += amount;
-    }
-
-    public void removeUnconfirmed (long amount) {
-
-        this.unconfirmed -= amount;
+        this.prestige -= amount;
     }
 
     public Set<Reward> getUnlockedRewards () {
@@ -133,8 +120,33 @@ public class PlayerData {
         return this.unlockedRewards;
     }
 
-    public void setUnlockedRewards (Set<Reward> unlockedRewards) {
+    public void unlockReward (Reward reward) {
 
-        this.unlockedRewards = unlockedRewards;
+        this.getUnlockedRewards().add(reward);
+    }
+
+    public void removeReward (Reward reward) {
+
+        this.getUnlockedRewards().remove(reward);
+    }
+
+    public Set<String> getSources () {
+
+        return this.sources;
+    }
+
+    public boolean hasSource (String source) {
+
+        return this.getSources().contains(source);
+    }
+
+    public void addSource (String source) {
+
+        this.getSources().add(source);
+    }
+
+    public void removeSource (String source) {
+
+        this.getSources().remove(source);
     }
 }

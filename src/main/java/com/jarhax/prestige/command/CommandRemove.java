@@ -35,7 +35,7 @@ public class CommandRemove extends CommandBase {
             if (player != null) {
 
                 final PlayerData data = GlobalPrestigeData.getPlayerData(player);
-                data.removeUnconfirmed(Long.parseLong(args[1]));
+                data.removePrestige(Long.parseLong(args[1]));
                 GlobalPrestigeData.save(player);
             }
         }

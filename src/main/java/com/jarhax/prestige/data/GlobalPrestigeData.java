@@ -38,7 +38,7 @@ public class GlobalPrestigeData {
             if (data != null) {
 
                 CACHE.put(data.getPlayerId(), data);
-                Prestige.LOG.info("Successfully loaded data for {}. Confirmed: {} Unconfirmed: {}", data.getPlayerId().toString(), data.getConfirmed(), data.getUnconfirmed());
+                Prestige.LOG.info("Successfully loaded data for {}. Confirmed: {} Unlocked: {}", data.getPlayerId().toString(), data.getPrestige(), data.getUnlockedRewards().size());
             }
         }
     }
