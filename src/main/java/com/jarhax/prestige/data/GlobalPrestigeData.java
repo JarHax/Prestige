@@ -29,7 +29,34 @@ public class GlobalPrestigeData {
         return CACHE.computeIfAbsent(player.getPersistentID(), PlayerData::new);
     }
 
-    public static void loadAllSavedPlayers () {
+    public static void saveAll () {
+
+        for (final PlayerData data : CACHE.values()) {
+
+            save(data);
+        }
+    }
+
+    public static void save (EntityPlayer player) {
+
+        save(getPlayerData(player));
+    }
+
+    public static void save (PlayerData data) {
+
+        try {
+
+            CompressedStreamTools.write(data.save(), new File(SAVE_DIR, data.getFileName()));
+            Prestige.LOG.info("Saving data for {}.", data.getPlayerId().toString());
+        }
+
+        catch (final IOException e) {
+
+            Prestige.LOG.trace("Could not save data for " + data.getPlayerId().toString(), e);
+        }
+    }
+
+    public static void loadAll () {
 
         for (final File file : SAVE_DIR.listFiles()) {
 
@@ -59,24 +86,5 @@ public class GlobalPrestigeData {
         }
 
         return null;
-    }
-
-    public static void save (EntityPlayer player) {
-
-        try {
-
-            CompressedStreamTools.write(getPlayerData(player).save(), getPlayerFile(player));
-            Prestige.LOG.info("Saving data for {}.", player.getName());
-        }
-
-        catch (final IOException e) {
-
-            Prestige.LOG.trace("Could not save data for " + player.getName(), e);
-        }
-    }
-
-    public static File getPlayerFile (EntityPlayer player) {
-
-        return new File(SAVE_DIR, player.getUniqueID().toString() + ".dat");
     }
 }

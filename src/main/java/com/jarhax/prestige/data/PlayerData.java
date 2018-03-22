@@ -149,4 +149,9 @@ public class PlayerData {
 
         this.getSources().remove(source);
     }
+
+    public String getFileName () {
+
+        return this.playerId.toString() + ".dat";
+    }
 }

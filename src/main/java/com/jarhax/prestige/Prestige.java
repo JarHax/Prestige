@@ -15,6 +15,8 @@ import net.darkhax.bookshelf.network.NetworkHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 
 @Mod(modid = "prestige", name = "Prestige", version = "@VERSION@", dependencies = "required-after:bookshelf@[2.3.523,)", certificateFingerprint = "@FINGERPRINT@")
 public class Prestige {
@@ -26,7 +28,18 @@ public class Prestige {
     @EventHandler
     public void onPreInit (FMLPreInitializationEvent event) {
 
-        GlobalPrestigeData.loadAllSavedPlayers();
         BookshelfRegistry.addCommand(new CommandPrestige());
+    }
+
+    @EventHandler
+    public void onServerStart (FMLServerStartingEvent event) {
+
+        GlobalPrestigeData.loadAll();
+    }
+
+    @EventHandler
+    public void onServerStop (FMLServerStoppingEvent event) {
+
+        GlobalPrestigeData.saveAll();
     }
 }
