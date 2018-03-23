@@ -25,7 +25,7 @@ public class Reward {
             throw new IllegalArgumentException("Prestige reward identifier can not be null or empty!");
         }
 
-        else if (identifier.matches("\\S+")) {
+        else if (identifier.matches("\\s+")) {
 
             throw new IllegalArgumentException("Prestige reward identifiers can not contain white space!");
         }
