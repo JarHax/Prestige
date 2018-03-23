@@ -10,7 +10,6 @@ public class GuiObjectBackGround extends GuiObject {
 
     private static final ResourceLocation BACKGROUND = new ResourceLocation("prestige", "textures/gui/gui_prestige_background.png");
     private static final ResourceLocation BACKGROUND_ALT = new ResourceLocation("prestige", "textures/gui/gui_prestige_background_alt.png");
-    private static final ResourceLocation BACKGROUND_BORDER = new ResourceLocation("prestige", "textures/gui/gui_prestige_background_border.png");
 
     private float offsetX;
     private float offsetY;
@@ -43,10 +42,6 @@ public class GuiObjectBackGround extends GuiObject {
             GlStateManager.scale(1, 1, 1);
             GlStateManager.popMatrix();
 
-            GlStateManager.pushMatrix();
-            this.mc.getTextureManager().bindTexture(BACKGROUND_BORDER);
-            RenderUtils.drawTexturedModalRect(this.getX(), this.getY(), 0, 0, this.getWidth(), this.getHeight());
-            GlStateManager.popMatrix();
         }
     }
 
