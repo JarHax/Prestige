@@ -25,6 +25,12 @@ public class CommandOpen extends Command {
     }
 
     @Override
+    public int getRequiredPermissionLevel () {
+
+        return 2;
+    }
+
+    @Override
     public void execute (MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
 
         final EntityPlayerMP player = args.length == 1 ? getPlayer(server, sender, args[0]) : sender instanceof EntityPlayerMP ? (EntityPlayerMP) sender : null;
