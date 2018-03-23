@@ -30,7 +30,7 @@ public class GuiPrestige extends GuiScreen {
     private GuiObject selectedObject;
     private final boolean editing;
     
-    private final Map<GuiObjectReward, List<GuiObjectReward>> connections = new HashMap<>();
+    private Map<GuiObjectReward, List<GuiObjectReward>> connections = new HashMap<>();
     
     public GuiPrestige(boolean editing) {
         
@@ -48,7 +48,7 @@ public class GuiPrestige extends GuiScreen {
         this.guiObjects = new LinkedHashMap<>();
         this.backGround = new GuiObjectBackGround(this, this.left, this.top, this.guiWidth, this.guiHeight);
         this.border = new GuiObjectBorder(this, left, top, guiWidth, guiHeight);
-        
+        this.connections = new LinkedHashMap<>();
         for(Reward reward : Prestige.REGISTRY.values()) {
             this.guiObjects.put(reward.getIdentifier(), new GuiObjectReward(this, left + reward.getX(), top + reward.getY(), reward));
         }
