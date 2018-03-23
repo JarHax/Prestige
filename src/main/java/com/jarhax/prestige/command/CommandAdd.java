@@ -59,7 +59,7 @@ public class CommandAdd extends Command {
                         }
 
                         // Send the player their error message.
-                        sender.sendMessage(new TextComponentTranslation("chat.prestige.hassource.reciever", args[2]).setStyle(new Style().setColor(TextFormatting.RED)));
+                        player.sendMessage(new TextComponentTranslation("chat.prestige.hassource.reciever", args[2]).setStyle(new Style().setColor(TextFormatting.RED)));
                         return;
                     }
 
@@ -78,7 +78,7 @@ public class CommandAdd extends Command {
                 }
 
                 // Send the player a confirmation message.
-                sender.sendMessage(new TextComponentTranslation("chat.prestige.added.reciever", args[1]).setStyle(new Style().setColor(TextFormatting.GREEN)));
+                player.sendMessage(new TextComponentTranslation("chat.prestige.added.reciever", args[1]).setStyle(new Style().setColor(TextFormatting.GREEN)));
             }
         }
     }
