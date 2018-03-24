@@ -29,6 +29,12 @@ public class CommandAdd extends Command {
     }
 
     @Override
+    public int getRequiredPermissionLevel () {
+
+        return 2;
+    }
+
+    @Override
     public void execute (MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
 
         if (args.length > 1 && args.length < 4 && NumberUtils.isParsable(args[1])) {
@@ -53,7 +59,7 @@ public class CommandAdd extends Command {
                         }
 
                         // Send the player their error message.
-                        sender.sendMessage(new TextComponentTranslation("chat.prestige.hassource.reciever", args[2]).setStyle(new Style().setColor(TextFormatting.RED)));
+                        player.sendMessage(new TextComponentTranslation("chat.prestige.hassource.reciever", args[2]).setStyle(new Style().setColor(TextFormatting.RED)));
                         return;
                     }
 
@@ -72,7 +78,7 @@ public class CommandAdd extends Command {
                 }
 
                 // Send the player a confirmation message.
-                sender.sendMessage(new TextComponentTranslation("chat.prestige.added.reciever", args[1]).setStyle(new Style().setColor(TextFormatting.GREEN)));
+                player.sendMessage(new TextComponentTranslation("chat.prestige.added.reciever", args[1]).setStyle(new Style().setColor(TextFormatting.GREEN)));
             }
         }
     }

@@ -22,7 +22,13 @@ public class CommandRemove extends Command {
     @Override
     public String getUsage (ICommandSender sender) {
 
-        return "/remove player amount";
+        return "/remove player <amount> [source]";
+    }
+
+    @Override
+    public int getRequiredPermissionLevel () {
+
+        return 2;
     }
 
     @Override
