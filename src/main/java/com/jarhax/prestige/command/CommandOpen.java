@@ -37,7 +37,7 @@ public class CommandOpen extends Command {
 
         if (player != null) {
 
-            Prestige.NETWORK.sendTo(new PacketOpenPrestigeGUI(args.length > 0), player);
+            Prestige.NETWORK.sendTo(new PacketOpenPrestigeGUI(), player);
 
             player.sendMessage(new TextComponentTranslation("chat.prestige.open.reciever", sender.getName()));
 
