@@ -2,29 +2,17 @@ package com.jarhax.prestige.client.gui;
 
 import com.jarhax.prestige.Prestige;
 import com.jarhax.prestige.api.Reward;
-import com.jarhax.prestige.client.gui.objects.GuiObject;
-import com.jarhax.prestige.client.gui.objects.GuiObjectBackGround;
-import com.jarhax.prestige.client.gui.objects.GuiObjectBorder;
-import com.jarhax.prestige.client.gui.objects.GuiObjectReward;
+import com.jarhax.prestige.client.gui.objects.*;
 import com.jarhax.prestige.client.utils.RenderUtils;
-import java.io.IOException;
-import java.util.*;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
-public class GuiPrestige extends GuiScreen {
+import java.io.IOException;
+import java.util.*;
+
+public class GuiPrestige extends GuiPrestigeBase {
     
-    private int guiWidth;
-    private int guiHeight;
-    private int left;
-    private int top;
-    
-    private int prevMX;
-    private int prevMY;
-    
-    private Map<String, GuiObjectReward> guiObjects;
     private GuiObjectBackGround backGround;
     private GuiObjectBorder border;
     
@@ -32,26 +20,33 @@ public class GuiPrestige extends GuiScreen {
     private Map<GuiObjectReward, List<GuiObjectReward>> connections = new HashMap<>();
     
     @Override
-    public void initGui () {
+    public void initGui() {
         
         this.guiWidth = 256;
         this.guiHeight = 256;
         super.initGui();
         this.left = this.width / 2 - this.guiWidth / 2;
         this.top = this.height / 2 - this.guiHeight / 2;
-        this.guiObjects = new LinkedHashMap<>();
+        guiObjects = new LinkedHashMap<>();
         this.backGround = new GuiObjectBackGround(this, this.left, this.top, this.guiWidth, this.guiHeight);
         this.border = new GuiObjectBorder(this, left, top, guiWidth, guiHeight);
         this.connections = new LinkedHashMap<>();
-        for (Reward reward : Prestige.REGISTRY.values()) {
-            this.guiObjects.put(reward.getIdentifier(), new GuiObjectReward(this, left + reward.getX(), top + reward.getY(), reward));
+        for(Reward reward : Prestige.REGISTRY.values()) {
+            if(reward.isPlaced())
+                guiObjects.put(reward.getIdentifier(), new GuiObjectReward(this, reward.getX(), reward.getY(), reward));
         }
-        for (Map.Entry<String, GuiObjectReward> entry : this.guiObjects.entrySet()) {
-            for (Reward reward : entry.getValue().getReward().getParents()) {
-                GuiObjectReward rew = this.guiObjects.get(reward.getIdentifier());
-                List<GuiObjectReward> list = connections.getOrDefault(rew, new LinkedList<>());
-                list.add(entry.getValue());
-                connections.put(rew, list);
+        for(Map.Entry<String, GuiObject> entry : this.guiObjects.entrySet()) {
+            if(entry.getValue() instanceof GuiObjectReward) {
+                for(Reward reward : ((GuiObjectReward) entry.getValue()).getReward().getParents()) {
+                    GuiObjectReward rew = (GuiObjectReward) this.guiObjects.get(reward.getIdentifier());
+                    if(!reward.isPlaced() || !rew.getReward().isPlaced()){
+                        continue;
+                    }
+                    
+                    List<GuiObjectReward> list = connections.getOrDefault(rew, new LinkedList<>());
+                    list.add((GuiObjectReward) entry.getValue());
+                    connections.put(rew, list);
+                }
             }
         }
         // this.guiObjects.add(new GuiObjectTest(this, left + 20,top + 20,32,32));
@@ -60,20 +55,19 @@ public class GuiPrestige extends GuiScreen {
     }
     
     @Override
-    public void updateScreen () {
+    public void updateScreen() {
         
         super.updateScreen();
-        for (final GuiObject object : this.guiObjects.values()) {
+        for(final GuiObject object : this.guiObjects.values()) {
             object.update();
         }
         this.guiObjects.values().forEach(object -> object.setVisible(true));
-        for (final GuiObject object : this.guiObjects.values()) {
-            if (!object.isAlwaysVisible()) {
+        for(final GuiObject object : this.guiObjects.values()) {
+            if(!object.isAlwaysVisible()) {
                 
-                if (this.backGround.collides(object)) {
+                if(this.backGround.collides(object)) {
                     object.setVisible(true);
-                }
-                else {
+                } else {
                     object.setVisible(false);
                 }
             }
@@ -81,19 +75,19 @@ public class GuiPrestige extends GuiScreen {
     }
     
     @Override
-    public void drawScreen (int mouseX, int mouseY, float partialTicks) {
+    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         
         GlStateManager.pushMatrix();
         this.backGround.draw(this.left, this.top, mouseX, mouseY, partialTicks);
         this.mc.getTextureManager().bindTexture(new ResourceLocation("prestige", "textures/gui/gui_prestige_line.png"));
-        for (final Map.Entry<GuiObjectReward, List<GuiObjectReward>> entry : this.connections.entrySet()) {
+        for(final Map.Entry<GuiObjectReward, List<GuiObjectReward>> entry : this.connections.entrySet()) {
             final GuiObjectReward start = entry.getKey();
-            if (!start.isVisible() || !start.shouldDrawLines()) {
+            if(!start.isVisible() || !start.shouldDrawLines()) {
                 continue;
             }
             //drawConnections
-            for (final GuiObjectReward end : entry.getValue()) {
-                if (!end.isVisible() || !end.shouldDrawLines())
+            for(final GuiObjectReward end : entry.getValue()) {
+                if(!end.isVisible() || !end.shouldDrawLines())
                     continue;
                 GlStateManager.pushMatrix();
                 final double angle = Math.atan2(end.getY() - start.getY(), end.getX() - start.getX()) * 180 / Math.PI;
@@ -107,8 +101,8 @@ public class GuiPrestige extends GuiScreen {
         }
         //draw objects
         GlStateManager.pushMatrix();
-        for (GuiObjectReward object : guiObjects.values()) {
-            if (object.isVisible()) {
+        for(GuiObject object : guiObjects.values()) {
+            if(object.isVisible()) {
                 
                 object.draw(this.left, this.top, mouseX, mouseY, partialTicks);
                 
@@ -125,32 +119,32 @@ public class GuiPrestige extends GuiScreen {
     }
     
     @Override
-    public void drawBackground (int tint) {
+    public void drawBackground(int tint) {
         
         super.drawBackground(tint);
     }
     
     @Override
-    public void handleMouseInput () throws IOException {
+    public void handleMouseInput() throws IOException {
         
         super.handleMouseInput();
     }
     
     @Override
-    public void handleKeyboardInput () throws IOException {
+    public void handleKeyboardInput() throws IOException {
         
         super.handleKeyboardInput();
     }
     
     @Override
-    protected void mouseClicked (int mouseX, int mouseY, int mouseButton) throws IOException {
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         
         super.mouseClicked(mouseX, mouseY, mouseButton);
         this.prevMX = mouseX;
         this.prevMY = mouseY;
-        if (mouseButton == 0) {
+        if(mouseButton == 0) {
             backGround.mouseClicked(mouseX, mouseY, mouseButton);
-            for (final GuiObject object : this.guiObjects.values()) {
+            for(final GuiObject object : this.guiObjects.values()) {
                 object.mouseClicked(mouseX, mouseY, mouseButton);
             }
         }
@@ -158,11 +152,11 @@ public class GuiPrestige extends GuiScreen {
     }
     
     @Override
-    protected void mouseClickMove (int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+    protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
         
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
         backGround.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-        for (final GuiObject object : this.guiObjects.values()) {
+        for(final GuiObject object : this.guiObjects.values()) {
             object.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
         }
         
@@ -172,49 +166,17 @@ public class GuiPrestige extends GuiScreen {
     }
     
     @Override
-    protected void mouseReleased (int mouseX, int mouseY, int state) {
+    protected void mouseReleased(int mouseX, int mouseY, int state) {
         
         super.mouseReleased(mouseX, mouseY, state);
         this.prevMX = -1;
         this.prevMY = -1;
         backGround.mouseReleased(mouseX, mouseY, state);
-        for (final GuiObject object : this.guiObjects.values()) {
+        for(final GuiObject object : this.guiObjects.values()) {
             object.mouseReleased(mouseX, mouseY, state);
         }
         
     }
     
-    public int getPrevMX () {
-        
-        return this.prevMX;
-    }
     
-    public int getPrevMY () {
-        
-        return this.prevMY;
-    }
-    
-    public int getGuiWidth () {
-        
-        return this.guiWidth;
-    }
-    
-    public int getGuiHeight () {
-        
-        return this.guiHeight;
-    }
-    
-    public int getLeft () {
-        
-        return this.left;
-    }
-    
-    public int getTop () {
-        
-        return this.top;
-    }
-    
-    public Map<String, GuiObjectReward> getGuiObjects () {
-        return guiObjects;
-    }
 }

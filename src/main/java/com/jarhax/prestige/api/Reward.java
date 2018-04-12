@@ -11,12 +11,17 @@ public class Reward {
     private final String title;
     private final String description;
     private final ItemStack icon;
-    private final int x;
-    private final int y;
+    private int x;
+    private int y;
     private final int cost;
 
     private final Set<Reward> parents = new HashSet<>();
     private final Set<Reward> children = new HashSet<>();
+    /*
+    Render stuff starts here
+     */
+    private boolean placed;
+    
 
     public Reward (String identifier, String title, int x, int y, int cost, ItemStack icon, String description) {
 
@@ -108,5 +113,21 @@ public class Reward {
 
         this.parents.add(parent);
         parent.addChild(this);
+    }
+    
+    public boolean isPlaced() {
+        return placed;
+    }
+    
+    public void setPlaced(boolean placed) {
+        this.placed = placed;
+    }
+    
+    public void setX(int x) {
+        this.x = x;
+    }
+    
+    public void setY(int y) {
+        this.y = y;
     }
 }

@@ -1,9 +1,9 @@
 package com.jarhax.prestige.client.gui.objects;
 
 import com.jarhax.prestige.api.Reward;
-import com.jarhax.prestige.client.gui.GuiPrestige;
+import com.jarhax.prestige.client.gui.GuiPrestigeBase;
 import com.jarhax.prestige.client.utils.RenderUtils;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.*;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
@@ -18,14 +18,14 @@ public class GuiObjectReward extends GuiObject {
     
     private boolean drawLines = true;
     
-    public GuiObjectReward(GuiPrestige parent, int x, int y, int width, int height, Reward reward) {
+    public GuiObjectReward(GuiPrestigeBase parent, int x, int y, int width, int height, Reward reward) {
         
         super(parent, x, y, width, height);
         this.reward = reward;
         this.brought = false;
     }
     
-    public GuiObjectReward(GuiPrestige parent, int x, int y, Reward reward) {
+    public GuiObjectReward(GuiPrestigeBase parent, int x, int y, Reward reward) {
         
         super(parent, x, y, 32, 32);
         this.reward = reward;
@@ -36,11 +36,6 @@ public class GuiObjectReward extends GuiObject {
     public void update() {
         
         super.update();
-        for(Reward reward1 : getReward().getParents()) {
-            if(getParent().getGuiObjects().get(reward1.getIdentifier()).isBrought()) {
-                enabled = true;
-            }
-        }
     }
     
     @Override
@@ -97,9 +92,11 @@ public class GuiObjectReward extends GuiObject {
     
     public void renderIcon() {
         GL11.glPushMatrix();
+        RenderHelper.enableGUIStandardItemLighting();
         GL11.glTranslated(getX() + 8, getY() + 8, -50);
         mc.getRenderItem().renderItemIntoGUI(reward.getIcon(), 0, 0);
         GL11.glTranslated(-(getX() + 8), -(getY() + 8), 50);
+        RenderHelper.disableStandardItemLighting();
         GL11.glPopMatrix();
     }
     

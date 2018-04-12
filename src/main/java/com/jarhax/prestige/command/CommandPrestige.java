@@ -12,6 +12,8 @@ public class CommandPrestige extends CommandTree {
         this.addSubcommand(new CommandInfo());
         this.addSubcommand(new CommandOpen());
         this.addSubcommand(new CommandSync());
+        this.addSubcommand(new CommandEdit());
+    
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.jarhax.prestige.client.gui.objects;
 
-import com.jarhax.prestige.client.gui.GuiPrestige;
+import com.jarhax.prestige.client.gui.*;
 import com.jarhax.prestige.client.utils.RenderUtils;
 
 import net.minecraft.client.renderer.GlStateManager;
@@ -17,7 +17,7 @@ public class GuiObjectBackGround extends GuiObject {
     private float offsetAltX;
     private float offsetAltY;
 
-    public GuiObjectBackGround (GuiPrestige parent, int x, int y, int width, int height) {
+    public GuiObjectBackGround (GuiPrestigeBase parent, int x, int y, int width, int height) {
 
         super(parent, x, y, width, height);
         this.offsetX = x;
@@ -30,7 +30,7 @@ public class GuiObjectBackGround extends GuiObject {
 
         if (this.visible) {
             this.mc.getTextureManager().bindTexture(BACKGROUND);
-            RenderUtils.drawTexturedModalRect(this.getX() + 2, this.getY() + 2, this.offsetX, this.offsetY, this.getWidth() - 2, this.getHeight() - 2);
+            RenderUtils.drawTexturedModalRect(this.getX() + 2, this.getY() + 2, this.offsetX, this.offsetY, this.getWidth() - 4, this.getHeight() - 4);
 
             GlStateManager.pushMatrix();
             GlStateManager.scale(2, 2, 2);
