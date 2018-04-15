@@ -4,8 +4,11 @@ import com.jarhax.prestige.Prestige;
 import com.jarhax.prestige.api.Reward;
 import com.jarhax.prestige.client.gui.objects.*;
 import com.jarhax.prestige.client.utils.RenderUtils;
+import com.jarhax.prestige.data.*;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
@@ -13,11 +16,32 @@ import java.util.*;
 
 public class GuiPrestige extends GuiPrestigeBase {
     
+    
     private GuiObjectBackGround backGround;
     private GuiObjectBorder border;
     
+    private final int north = 0;
+    private final int east = 1;
+    private final int south = 2;
+    private final int west = 3;
     
-    private Map<GuiObjectReward, List<GuiObjectReward>> connections = new HashMap<>();
+    
+    public void generateRewards() {
+        guiObjects.clear();
+        Collection<Reward> values = new LinkedList<>(Prestige.REGISTRY.values());
+        ((LinkedList<Reward>) values).sort(Comparator.comparing(Reward::getIdentifier));
+        for(Reward reward : values) {
+            GuiObjectReward rew;
+            if(reward.isPlaced()) {
+                rew = new GuiObjectReward(this, reward);
+                PlayerData data = GlobalPrestigeData.getPlayerData(player);
+                if(data.hasReward(reward)) {
+                    rew.setPurchased(true);
+                }
+                this.guiObjects.put(rew.getReward().getIdentifier(), rew);
+            }
+        }
+    }
     
     @Override
     public void initGui() {
@@ -27,31 +51,13 @@ public class GuiPrestige extends GuiPrestigeBase {
         super.initGui();
         this.left = this.width / 2 - this.guiWidth / 2;
         this.top = this.height / 2 - this.guiHeight / 2;
-        guiObjects = new LinkedHashMap<>();
+        player = mc.player;
+        data = GlobalPrestigeData.getPlayerData(player);
+        this.guiObjects = new LinkedHashMap<>();
         this.backGround = new GuiObjectBackGround(this, this.left, this.top, this.guiWidth, this.guiHeight);
         this.border = new GuiObjectBorder(this, left, top, guiWidth, guiHeight);
-        this.connections = new LinkedHashMap<>();
-        for(Reward reward : Prestige.REGISTRY.values()) {
-            if(reward.isPlaced())
-                guiObjects.put(reward.getIdentifier(), new GuiObjectReward(this, reward.getX(), reward.getY(), reward));
-        }
-        for(Map.Entry<String, GuiObject> entry : this.guiObjects.entrySet()) {
-            if(entry.getValue() instanceof GuiObjectReward) {
-                for(Reward reward : ((GuiObjectReward) entry.getValue()).getReward().getParents()) {
-                    GuiObjectReward rew = (GuiObjectReward) this.guiObjects.get(reward.getIdentifier());
-                    if(!reward.isPlaced() || !rew.getReward().isPlaced()){
-                        continue;
-                    }
-                    
-                    List<GuiObjectReward> list = connections.getOrDefault(rew, new LinkedList<>());
-                    list.add((GuiObjectReward) entry.getValue());
-                    connections.put(rew, list);
-                }
-            }
-        }
-        // this.guiObjects.add(new GuiObjectTest(this, left + 20,top + 20,32,32));
-        // this.guiObjects.add(new GuiMenu(this, this.left-55, this.top, 100, 100));
         
+        generateRewards();
     }
     
     @Override
@@ -72,6 +78,20 @@ public class GuiPrestige extends GuiPrestigeBase {
                 }
             }
         }
+        this.guiObjects.values().forEach(object -> object.setVisible(true));
+        for(GuiObjectReward object : guiObjects.values()) {
+            if(!object.isPlaced()) {
+                continue;
+            }
+            if(!object.isAlwaysVisible()) {
+                
+                if(this.backGround.collides(object)) {
+                    object.setVisible(true);
+                } else {
+                    object.setVisible(false);
+                }
+            }
+        }
     }
     
     @Override
@@ -80,42 +100,143 @@ public class GuiPrestige extends GuiPrestigeBase {
         GlStateManager.pushMatrix();
         this.backGround.draw(this.left, this.top, mouseX, mouseY, partialTicks);
         this.mc.getTextureManager().bindTexture(new ResourceLocation("prestige", "textures/gui/gui_prestige_line.png"));
-        for(final Map.Entry<GuiObjectReward, List<GuiObjectReward>> entry : this.connections.entrySet()) {
-            final GuiObjectReward start = entry.getKey();
-            if(!start.isVisible() || !start.shouldDrawLines()) {
-                continue;
-            }
-            //drawConnections
-            for(final GuiObjectReward end : entry.getValue()) {
-                if(!end.isVisible() || !end.shouldDrawLines())
+        ScaledResolution resolution = new ScaledResolution(mc);
+        int scale = resolution.getScaleFactor();
+        GL11.glEnable(GL11.GL_SCISSOR_TEST);
+        GL11.glScissor((left + 4) * scale, (top - 1 + 4) * scale, (guiWidth - 8) * scale, (guiHeight + 1 - 8) * scale);
+        
+        for(GuiObjectReward parent : guiObjects.values()) {
+            Vec3d start = new Vec3d(parent.getX() + parent.getWidth() / 2, parent.getY() + parent.getHeight() / 2, 0);
+            for(Reward child : parent.getReward().getChildren()) {
+                GuiObjectReward childObject = getObject(child.getIdentifier());
+                if(childObject == null) {
                     continue;
+                }
+                Vec3d end = new Vec3d(childObject.getX() + childObject.getWidth() / 2, childObject.getY() + childObject.getHeight() / 2, 0);
                 GlStateManager.pushMatrix();
-                final double angle = Math.atan2(end.getY() - start.getY(), end.getX() - start.getX()) * 180 / Math.PI;
-                GL11.glTranslated(start.getX() + start.getWidth() / 2, start.getY() + start.getHeight() / 2, 0);
+                final double angle = Math.atan2(childObject.getY() - parent.getY(), childObject.getX() - parent.getX()) * 180 / Math.PI;
+                GL11.glTranslated(parent.getX() + parent.getWidth() / 2, parent.getY() + parent.getHeight() / 2, 0);
                 GL11.glRotated(angle, 0, 0, 1);
-                float length = (float) Math.sqrt((end.getX() - start.getX()) * (end.getX() - start.getX()) + (end.getY() - start.getY()) * (end.getY() - start.getY()));
-                RenderUtils.drawTexturedModalRect(0, 0, RenderUtils.remap((float) (System.nanoTime() / 2000000000.0), 1, 0, 0, 16), 0, length, 4);
-                GL11.glTranslated(-(start.getX() + start.getWidth() / 2), -(start.getY() + start.getHeight() / 2), 0);
+                float length = (float) start.distanceTo(end);
+                RenderUtils.drawTexturedModalRect(0, 0, RenderUtils.remap((float) (System.nanoTime() / 1000000000.0), 1, 0, 0, 16), 0, length, 4);
+                GL11.glTranslated(-(parent.getX() + parent.getWidth() / 2), -(parent.getY() + parent.getHeight() / 2), 0);
                 GlStateManager.popMatrix();
             }
         }
+        
         //draw objects
         GlStateManager.pushMatrix();
         for(GuiObject object : guiObjects.values()) {
             if(object.isVisible()) {
-                
                 object.draw(this.left, this.top, mouseX, mouseY, partialTicks);
                 
             }
         }
-        //        GlStateManager.disableAlpha();
+        
+        for(GuiObjectReward reward : guiObjects.values()) {
+            if(reward.isVisible())
+                if(reward.getY() >= this.getTop() && reward.getY() + reward.getHeight() <= this.getTop() + this.getGuiHeight()) {
+                    reward.draw(this.left, this.top, mouseX, mouseY, partialTicks);
+                }
+        }
+        
+        GL11.glDisable(GL11.GL_SCISSOR_TEST);
+        
         GlStateManager.popMatrix();
-        GL11.glTranslated(0, 0, 500);
-        this.border.draw(left, top, mouseX, mouseY, partialTicks);
-        GL11.glTranslated(0, 0, -500);
         GlStateManager.popMatrix();
         
+        
+        GlStateManager.pushMatrix();
+        GL11.glTranslated(0, 0, 500);
+        this.border.draw(left, top, mouseX, mouseY, partialTicks);
+        fontRenderer.drawString("Prestige points: " + data.getPrestige(), left + 5, top +5, 0);
+        GL11.glTranslated(0, 0, 0);
+        GlStateManager.popMatrix();
+        for(GuiObjectReward reward : guiObjects.values()) {
+            if(reward.isVisible())
+                if(reward.collides(mouseX, mouseY, mouseX, mouseY)) {
+                    if(reward.getY() >= this.getTop() && reward.getY() + reward.getHeight() <= this.getTop() + this.getGuiHeight()) {
+                        reward.drawText(mouseX, mouseY);
+                    }
+                }
+        }
+        
+        boolean[] sides = new boolean[4];
+        for(GuiObjectReward reward : guiObjects.values()) {
+            if(!reward.isPlaced()) {
+                continue;
+            }
+            if((sides[north] && sides[east] && sides[west] && sides[south])) {
+                break;
+            }
+            if(!sides[west]) {
+                if(reward.getX() < left) {
+                    sides[west] = true;
+                }
+            }
+            if(!sides[east]) {
+                if(reward.getX() > left + guiWidth) {
+                    sides[east] = true;
+                }
+            }
+            if(!sides[north]) {
+                if(reward.getY() < top) {
+                    sides[north] = true;
+                }
+            }
+            if(!sides[south]) {
+                if(reward.getY() > top + guiHeight) {
+                    sides[south] = true;
+                }
+            }
+            
+        }
+        if((sides[north] || sides[east] || sides[west] || sides[south])) {
+            this.mc.getTextureManager().bindTexture(new ResourceLocation("prestige", "textures/gui/gui_prestige_line.png"));
+            if(sides[north]) {
+                GlStateManager.pushMatrix();
+                GlStateManager.translate(0, 0, 500);
+                RenderUtils.drawLineUntextured((left + guiWidth / 2) - 4, top + 25, left + guiWidth / 2, top + 20, 0, 1, 1, 5);
+                RenderUtils.drawLineUntextured((left + guiWidth / 2) + 4, top + 25, left + guiWidth / 2, top + 20, 0, 1, 1, 5);
+                RenderUtils.drawLineUntextured((left + guiWidth / 2) - 4, top + 25, left + guiWidth / 2 + 4, top + 25, 0, 1, 1, 5);
+                
+                GlStateManager.translate(0, 0, -500);
+                GlStateManager.popMatrix();
+            }
+            
+            if(sides[south]) {
+                GlStateManager.pushMatrix();
+                GlStateManager.translate(0, 0, 500);
+                RenderUtils.drawLineUntextured((left + guiWidth / 2) - 4, top + guiHeight - 25, left + guiWidth / 2, top + guiHeight - 20, 0, 1, 1, 5);
+                RenderUtils.drawLineUntextured((left + guiWidth / 2) + 4, top + guiHeight - 25, left + guiWidth / 2, top + guiHeight - 20, 0, 1, 1, 5);
+                RenderUtils.drawLineUntextured((left + guiWidth / 2) - 4, top + guiHeight - 25, left + guiWidth / 2 + 4, top + guiHeight - 25, 0, 1, 1, 5);
+                GlStateManager.translate(0, 0, -500);
+                GlStateManager.popMatrix();
+            }
+            
+            if(sides[east]) {
+                GlStateManager.pushMatrix();
+                GlStateManager.translate(0, 0, 500);
+                RenderUtils.drawLineUntextured(left + guiWidth - 25, top + guiHeight / 2 - 4, left + guiWidth - 20, top + guiHeight / 2, 0, 1, 1, 5);
+                RenderUtils.drawLineUntextured(left + guiWidth - 25, top + guiHeight / 2 + 4, left + guiWidth - 20, top + guiHeight / 2, 0, 1, 1, 5);
+                RenderUtils.drawLineUntextured(left + guiWidth - 25, top + guiHeight / 2 - 4, left + guiWidth - 25, top + (guiHeight / 2) + 4, 0, 1, 1, 5);
+                GlStateManager.translate(0, 0, -500);
+                GlStateManager.popMatrix();
+            }
+            
+            if(sides[west]) {
+                GlStateManager.pushMatrix();
+                GlStateManager.translate(0, 0, 500);
+                RenderUtils.drawLineUntextured(left + 25, top + guiHeight / 2 - 4, left + 20, top + guiHeight / 2, 0, 1, 1, 5);
+                RenderUtils.drawLineUntextured(left + 25, top + guiHeight / 2 + 4, left + 20, top + guiHeight / 2, 0, 1, 1, 5);
+                RenderUtils.drawLineUntextured(left + 25, top + guiHeight / 2 - 4, left + 25, top + (guiHeight / 2) + 4, 0, 1, 1, 5);
+                GlStateManager.translate(0, 0, -500);
+                GlStateManager.popMatrix();
+            }
+        }
         super.drawScreen(mouseX, mouseY, partialTicks);
+        
+        
     }
     
     @Override
@@ -131,9 +252,8 @@ public class GuiPrestige extends GuiPrestigeBase {
     }
     
     @Override
-    public void handleKeyboardInput() throws IOException {
-        
-        super.handleKeyboardInput();
+    protected void keyTyped(char typedChar, int keyCode) throws IOException {
+        super.keyTyped(typedChar, keyCode);
     }
     
     @Override
@@ -142,24 +262,35 @@ public class GuiPrestige extends GuiPrestigeBase {
         super.mouseClicked(mouseX, mouseY, mouseButton);
         this.prevMX = mouseX;
         this.prevMY = mouseY;
+        
         if(mouseButton == 0) {
-            backGround.mouseClicked(mouseX, mouseY, mouseButton);
+            boolean valid = true;
+            
             for(final GuiObject object : this.guiObjects.values()) {
+                if(object.collides(mouseX, mouseY, mouseX, mouseY)) {
+                    valid = false;
+                }
                 object.mouseClicked(mouseX, mouseY, mouseButton);
+                
             }
+            
+            if(valid)
+                backGround.mouseClicked(mouseX, mouseY, mouseButton);
         }
         
+        
     }
+    
     
     @Override
     protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
         
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-        backGround.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-        for(final GuiObject object : this.guiObjects.values()) {
+        
+        for(GuiObjectReward object : this.guiObjects.values()) {
             object.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
         }
-        
+        backGround.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
         this.prevMX = mouseX;
         this.prevMY = mouseY;
         
@@ -175,8 +306,14 @@ public class GuiPrestige extends GuiPrestigeBase {
         for(final GuiObject object : this.guiObjects.values()) {
             object.mouseReleased(mouseX, mouseY, state);
         }
-        
     }
     
-    
+    public GuiObjectReward getObject(String identifier) {
+        for(GuiObjectReward reward : guiObjects.values()) {
+            if(reward.getReward().getIdentifier().equals(identifier)) {
+                return reward;
+            }
+        }
+        return null;
+    }
 }

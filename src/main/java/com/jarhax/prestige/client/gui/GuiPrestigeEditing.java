@@ -5,9 +5,15 @@ import com.jarhax.prestige.api.Reward;
 import com.jarhax.prestige.client.gui.objects.*;
 import com.jarhax.prestige.client.gui.objects.editing.*;
 import com.jarhax.prestige.client.utils.RenderUtils;
+import net.minecraft.client.gui.*;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.util.ResourceLocation;
-import org.lwjgl.input.*;
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.init.Items;
+import net.minecraft.item.*;
+import net.minecraft.util.*;
+import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
@@ -19,13 +25,61 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
     
     private GuiObjectBackGround backGround;
     private GuiObjectBorder border;
-    private Map<GuiObjectEditingReward, List<GuiObjectEditingReward>> connections = new HashMap<>();
     private List<GuiObjectEditingReward> unplacedRewards;
+    private List<GuiObjectItemStack> stackList;
+    
     private GuiObjectEditingReward selectedReward;
     private int yOff = 0;
+    //rows
+    private int stackYOff = 0;
     private GuiObjectEditingReward editingReward;
     
-    private GuiObjectInformation informationPanel;
+    
+    private GuiTextField fieldName;
+    private GuiTextField fieldDesc;
+    private GuiTextField fieldCost;
+    private GuiTextField fieldID;
+    
+    private GuiButtonTooltip buttonCreateNewReward;
+    private GuiButtonTooltip buttonRemoveReward;
+    private GuiButtonTooltip buttonUpdateReward;
+    private GuiButtonTooltip buttonSave;
+    private GuiButtonTooltip buttonReset;
+    
+    
+    private final int north = 0;
+    private final int east = 1;
+    private final int south = 2;
+    private final int west = 3;
+    
+    public GuiObjectItemStack selectedStack;
+    
+    public void generateRewards() {
+        unplacedRewards.clear();
+        int offX = 0;
+        int offY = 0;
+        Collection<Reward> values = new LinkedList<>(Prestige.REGISTRY.values());
+        ((LinkedList<Reward>) values).sort(Comparator.comparing(Reward::getIdentifier));
+        for(Reward reward : values) {
+            GuiObjectEditingReward rew;
+            if(reward.isPlaced()) {
+                rew = new GuiObjectEditingReward(this, reward);
+                rew.setPlaced(true);
+            } else {
+                rew = new GuiObjectEditingReward(this, this.left - 96 + (offX * 32), this.top + offY * 32, reward);
+                rew.setPlaced(false);
+            }
+            this.unplacedRewards.add(rew);
+            rew.setGridX(offX);
+            rew.setGridY(offY);
+            offX++;
+            if(offX == 2) {
+                offX = 0;
+                offY++;
+            }
+            
+        }
+    }
     
     @Override
     public void initGui() {
@@ -39,45 +93,71 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         unplacedRewards = new LinkedList<>();
         this.backGround = new GuiObjectBackGround(this, this.left, this.top, this.guiWidth, this.guiHeight);
         this.border = new GuiObjectBorder(this, left, top, guiWidth, guiHeight);
-        this.informationPanel = new GuiObjectInformation(this, left + guiWidth + 5, top + 4, 100, guiHeight - 4);
-        this.connections = new LinkedHashMap<>();
+        
+        generateRewards();
+        
         int offX = 0;
         int offY = 0;
-        
-        for(Reward reward : Prestige.REGISTRY.values()) {
-            GuiObjectEditingReward rew;
-            if(reward.isPlaced()) {
-                rew = new GuiObjectEditingReward(this, reward);
-                rew.setPlaced(true);
-            } else {
-                rew = new GuiObjectEditingReward(this, this.left - 96 + (offX * 32), this.top + offY * 32, reward);
-                rew.setPlaced(false);
-            }
-            
-            
-            this.unplacedRewards.add(rew);
-            rew.setGridX(offX);
-            rew.setGridY(offY);
+        stackList = new LinkedList<>();
+        NonNullList<ItemStack> stacks = NonNullList.create();
+        for(Item item : ForgeRegistries.ITEMS) {
+            item.getSubItems(CreativeTabs.SEARCH, stacks);
+        }
+        for(ItemStack stack : stacks) {
+            GuiObjectItemStack st = new GuiObjectItemStack(this, this.left + guiWidth + 5 + (offX * 18), this.top + 150 + (offY * 18), stack);
+            stackList.add(st);
+            st.setGridX(offX);
+            st.setGridY(offY);
             offX++;
-            if(offX == 2) {
+            if(offX == 5) {
                 offX = 0;
                 offY++;
             }
-            
+            selectedStack = stackList.get(0);
         }
-        for(GuiObjectEditingReward rewa : unplacedRewards) {
-            if(rewa.isPlaced()) {
-                for(Reward reward : rewa.getReward().getParents()) {
-                    GuiObjectEditingReward rew = getEditingObject(reward.getIdentifier());
-                    List<GuiObjectEditingReward> list = connections.getOrDefault(rew, new LinkedList<>());
-                    if(rew.isPlaced())
-                        list.add(rewa);
-                    connections.put(rew, list);
-                }
+        
+        int x = 20;
+        int count = 0;
+        fieldID = new GuiTextField(0, fontRenderer, left + guiWidth + 5, top + x + (35 * count++), 100, 20);
+        fieldID.setMaxStringLength(Integer.MAX_VALUE);
+        fieldName = new GuiTextField(0, fontRenderer, left + guiWidth + 5, top + x + (35 * count++), 100, 20);
+        fieldName.setMaxStringLength(Integer.MAX_VALUE);
+        fieldDesc = new GuiTextField(0, fontRenderer, left + guiWidth + 5, top + x + (35 * count++), 100, 20);
+        fieldDesc.setMaxStringLength(Integer.MAX_VALUE);
+        fieldCost = new GuiTextField(0, fontRenderer, left + guiWidth + 5, top + x + (35 * count++), 100, 20);
+        fieldCost.setMaxStringLength(Integer.MAX_VALUE);
+        
+        fieldCost.setValidator(input -> {
+            if(input == null || input.isEmpty()) {
+                return true;
             }
-        }
-        // this.guiObjects.add(new GuiObjectTest(this, left + 20,top + 20,32,32));
-        // this.guiObjects.add(new GuiMenu(this, this.left-55, this.top, 100, 100));
+            try {
+                Integer.parseInt(input);
+                return true;
+            } catch(Exception e) {
+                return false;
+            }
+        });
+        
+        fieldName.setEnabled(true);
+        fieldDesc.setEnabled(true);
+        fieldCost.setEnabled(true);
+        fieldID.setEnabled(true);
+        fieldCost.setText("0");
+        count = 0;
+        buttonCreateNewReward = new GuiButtonTooltip(0, left + guiWidth + 5 + (20 * count++), top - 20, 20, 20, "+", this, "Add");
+        buttonRemoveReward = new GuiButtonTooltip(1, left + guiWidth + 5 + (20 * count++), top - 20, 20, 20, "-", this, "Remove");
+        buttonUpdateReward = new GuiButtonTooltip(2, left + guiWidth + 5 + (20 * count++), top - 20, 20, 20, "*", this, "Update");
+        buttonSave = new GuiButtonTooltip(3, left + guiWidth + 5 + (20 * count++), top - 20, 20, 20, "S", this, "Save");
+        buttonReset = new GuiButtonTooltip(4, left + guiWidth + 5 + (20 * count), top - 20, 20, 20, "R", this, "Reset");
+        
+        this.addButton(buttonCreateNewReward);
+        this.addButton(buttonRemoveReward);
+        this.addButton(buttonUpdateReward);
+        this.addButton(buttonSave);
+        this.addButton(buttonReset);
+        
+        
     }
     
     @Override
@@ -112,6 +192,19 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                 }
             }
         }
+        if(editingReward != null) {
+            fieldName.updateCursorCounter();
+            fieldDesc.updateCursorCounter();
+            fieldCost.updateCursorCounter();
+            fieldID.updateCursorCounter();
+            
+        }
+        
+        if(editingReward == null) {
+            buttonCreateNewReward.visible = true;
+        } else {
+            buttonCreateNewReward.visible = false;
+        }
     }
     
     @Override
@@ -120,29 +213,29 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         GlStateManager.pushMatrix();
         this.backGround.draw(this.left, this.top, mouseX, mouseY, partialTicks);
         this.mc.getTextureManager().bindTexture(new ResourceLocation("prestige", "textures/gui/gui_prestige_line.png"));
-        for(final Map.Entry<GuiObjectEditingReward, List<GuiObjectEditingReward>> entry : this.connections.entrySet()) {
-            final GuiObjectEditingReward start = entry.getKey();
-            if(!start.isVisible() || !start.shouldDrawLines()) {
-                continue;
-            }
-            //drawConnections
-            for(final GuiObjectEditingReward end : entry.getValue()) {
-//                if(!end.shouldDrawLines())
-//                    continue;
-                GlStateManager.pushMatrix();
-                final double angle = Math.atan2(end.getY() - start.getY(), end.getX() - start.getX()) * 180 / Math.PI;
-                GL11.glTranslated(start.getX() + start.getWidth() / 2, start.getY() + start.getHeight() / 2, 0);
-                GL11.glRotated(angle, 0, 0, 1);
-                float length = (float) Math.sqrt((end.getX() - start.getX()) * (end.getX() - start.getX()) + (end.getY() - start.getY()) * (end.getY() - start.getY()));
-                if(!end.isVisible()){
-                    //get the distance to the border
-                    length = (float) Math.sqrt((end.getX() - start.getX()) * (end.getX() - start.getX()) + (end.getY() - start.getY()) * (end.getY() - start.getY()));
+        ScaledResolution resolution = new ScaledResolution(mc);
+        int scale = resolution.getScaleFactor();
+        GL11.glScissor((left + 4) * scale, (top - 1 + 4) * scale, (guiWidth - 8) * scale, (guiHeight + 1 - 8) * scale);
+        GL11.glEnable(GL11.GL_SCISSOR_TEST);
+        for(GuiObjectEditingReward parent : unplacedRewards) {
+            Vec3d start = new Vec3d(parent.getX() + parent.getWidth() / 2, parent.getY() + parent.getHeight() / 2, 0);
+            for(Reward child : parent.getReward().getChildren()) {
+                GuiObjectEditingReward childObject = getObject(child.getIdentifier());
+                if(childObject == null) {
+                    continue;
                 }
-                RenderUtils.drawTexturedModalRect(0, 0, RenderUtils.remap((float) (System.nanoTime() / 2000000000.0), 1, 0, 0, 16), 0, length, 4);
-                GL11.glTranslated(-(start.getX() + start.getWidth() / 2), -(start.getY() + start.getHeight() / 2), 0);
+                Vec3d end = new Vec3d(child.getX() + childObject.getWidth() / 2, child.getY() + childObject.getHeight() / 2, 0);
+                GlStateManager.pushMatrix();
+                final double angle = Math.atan2(child.getY() - parent.getY(), child.getX() - parent.getX()) * 180 / Math.PI;
+                GL11.glTranslated(parent.getX() + parent.getWidth() / 2, parent.getY() + parent.getHeight() / 2, 0);
+                GL11.glRotated(angle, 0, 0, 1);
+                float length = (float) start.distanceTo(end);
+                RenderUtils.drawTexturedModalRect(0, 0, RenderUtils.remap((float) (System.nanoTime() / 1000000000.0), 1, 0, 0, 16), 0, length, 4);
+                GL11.glTranslated(-(parent.getX() + parent.getWidth() / 2), -(parent.getY() + parent.getHeight() / 2), 0);
                 GlStateManager.popMatrix();
             }
         }
+        GL11.glDisable(GL11.GL_SCISSOR_TEST);
         //draw objects
         GlStateManager.pushMatrix();
         for(GuiObject object : guiObjects.values()) {
@@ -152,8 +245,23 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
             }
         }
         
+        for(GuiObjectItemStack stack : stackList) {
+            if(!stack.isVisible()) {
+                continue;
+            }
+            if(stack.getY() >= top + 150 && stack.getY() + stack.getHeight() <= top + 150 + (5 * 18)) {
+                if(selectedStack.equals(stack)) {
+                    RenderUtils.drawLineUntextured(stack.getX(), stack.getY(), stack.getX2()-2, stack.getY(), 0f, 0.8f, 0.8f, 2);
+                    RenderUtils.drawLineUntextured(stack.getX(), stack.getY2()-2, stack.getX2()-2, stack.getY2()-2, 0f, 0.8f, 0.8f, 2);
+                    RenderUtils.drawLineUntextured(stack.getX(), stack.getY(), stack.getX(), stack.getY2()-2, 0f, 0.8f, 0.8f, 2);
+                    RenderUtils.drawLineUntextured(stack.getX2()-2, stack.getY(), stack.getX2()-2, stack.getY2()-2, 0f, 0.8f, 0.8f, 2);
+                }
+                stack.draw(left, top, mouseX, mouseY, partialTicks);
+            }
+        }
+        
         for(GuiObjectEditingReward reward : unplacedRewards) {
-            if(!reward.equals(selectedReward))
+            if(!reward.equals(selectedReward)) {
                 if(reward.isVisible())
                     if(reward.getY() >= this.getTop() && reward.getY() + reward.getHeight() <= this.getTop() + this.getGuiHeight()) {
                         if(reward.equals(editingReward)) {
@@ -164,19 +272,8 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                             GlStateManager.color(1, 1, 1, 1);
                         }
                     }
-        }
-        for(GuiObjectEditingReward reward : unplacedRewards) {
-            if(!reward.equals(selectedReward)) {
-                if(reward.isVisible())
-                    if(reward.collides(mouseX, mouseY, mouseX, mouseY)) {
-                        if(reward.getY() >= this.getTop() && reward.getY() + reward.getHeight() <= this.getTop() + this.getGuiHeight()) {
-                            reward.drawText(mouseX, mouseY);
-                        }
-                    }
             }
         }
-        
-        //        GlStateManager.disableAlpha();
         
         
         GlStateManager.popMatrix();
@@ -186,7 +283,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         GlStateManager.pushMatrix();
         GL11.glTranslated(0, 0, 500);
         this.border.draw(left, top, mouseX, mouseY, partialTicks);
-        GL11.glTranslated(0, 0, -500);
+        GL11.glTranslated(0, 0, 0);
         GlStateManager.popMatrix();
         
         if(selectedReward != null) {
@@ -224,28 +321,25 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                         continue;
                     }
                     if(selectedReward.getX() == reward.getX()) {
-                        y1.setMinX(Math.min(reward.getX(), y1.getMinX()));
-                        y2.setMinX(Math.min(reward.getX() + reward.getWidth(), y2.getMaxX()));
-                        y1.setMaxX(Math.max(reward.getX(), y1.getMinX()));
-                        y2.setMaxX(Math.max(reward.getX() + reward.getWidth(), y2.getMaxX()));
+                        y1.setX(Math.min(reward.getX(), y1.getMinX()));
+                        y2.setX(Math.min(reward.getX() + reward.getWidth(), y2.getMaxX()));
                         
                         y1.setMinY(Math.min(reward.getY(), y1.getMinY()));
-                        y2.setMinY(Math.min(reward.getY(), y2.getMinY()));
                         y1.setMaxY(Math.max(reward.getY() + reward.getHeight(), y1.getMaxY()));
+                        y2.setMinY(Math.min(reward.getY(), y2.getMinY()));
                         y2.setMaxY(Math.max(reward.getY() + reward.getHeight(), y2.getMaxY()));
+                        
                         y1.setShouldDraw(true);
                         y2.setShouldDraw(true);
                     }
                     if(selectedReward.getX() + selectedReward.getWidth() == reward.getX()) {
-                        y2.setMinX(y2.getMaxX());
-                        y2.setMaxX(y2.getMaxX());
+                        y2.setX(y2.getMaxX());
                         y2.setMinY(Math.min(reward.getY(), y2.getMinY()));
                         y2.setMaxY(Math.max(reward.getY() + reward.getHeight(), y2.getMaxY()));
                         y2.setShouldDraw(true);
                     }
                     if(selectedReward.getX() == reward.getX() + reward.getWidth()) {
-                        y1.setMinX(y1.getMinX());
-                        y1.setMaxX(y1.getMinX());
+                        y1.setX(y1.getMinX());
                         y1.setMinY(Math.min(reward.getY(), y1.getMinY()));
                         y1.setMaxY(Math.max(reward.getY() + reward.getHeight(), y1.getMaxY()));
                         y1.setShouldDraw(true);
@@ -253,10 +347,8 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                     
                     
                     if(selectedReward.getY() == reward.getY()) {
-                        x1.setMinY(Math.min(reward.getY(), x1.getMinY()));
-                        x1.setMaxY(Math.min(reward.getY(), x1.getMinY()));
-                        x2.setMinY(Math.min(reward.getY() + reward.getHeight(), x2.getMaxY()));
-                        x2.setMaxY(Math.min(reward.getY() + reward.getHeight(), x2.getMaxY()));
+                        x1.setY(Math.min(reward.getY(), x1.getMinY()));
+                        x2.setY(Math.min(reward.getY() + reward.getHeight(), x2.getMaxY()));
                         
                         x1.setMinX(Math.min(reward.getX(), x1.getMinX()));
                         x1.setMaxX(Math.max(reward.getX() + reward.getWidth(), x1.getMaxX()));
@@ -270,15 +362,13 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                     
                     
                     if(selectedReward.getY() + selectedReward.getHeight() == reward.getY()) {
-                        x2.setMinY(Math.min(reward.getY(), x2.getMaxY()));
-                        x2.setMaxY(Math.min(reward.getY(), x2.getMaxY()));
+                        x2.setY(Math.min(reward.getY(), x2.getMaxY()));
                         x2.setMinX(Math.min(reward.getX(), x2.getMinX()));
                         x2.setMaxX(Math.max(reward.getX() + reward.getWidth(), x2.getMaxX()));
                         x2.setShouldDraw(true);
                     }
                     if(selectedReward.getY() == reward.getY() + reward.getHeight()) {
-                        x1.setMinY(Math.min(reward.getY() + reward.getHeight(), x1.getMinY()));
-                        x1.setMaxY(Math.min(reward.getY() + reward.getHeight(), x1.getMinY()));
+                        x1.setY(Math.min(reward.getY() + reward.getHeight(), x1.getMinY()));
                         x1.setMinX(Math.min(reward.getX(), x1.getMinX()));
                         x1.setMaxX(Math.max(reward.getX() + reward.getWidth(), x1.getMaxX()));
                         x1.setShouldDraw(true);
@@ -296,29 +386,14 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
             GlStateManager.pushMatrix();
             GL11.glTranslated(0, 0, 500);
             selectedReward.draw(this.left, this.top, mouseX, mouseY, partialTicks);
-            //            selectedReward.drawText(mouseX, mouseY);
             GL11.glTranslated(0, 0, -500);
             GlStateManager.popMatrix();
             
             
-            //            for(GuiObjectEditingReward reward : unplacedRewards) {
-            //                if(reward.isPlaced()){
-            //                    continue;
-            //                }
-            //
-            //            }
-            
-            
         }
-        informationPanel.draw(left, top, mouseX, mouseY, partialTicks);
         
-        //TODO side detection
+        
         boolean[] sides = new boolean[4];
-        int north = 0;
-        int east = 1;
-        int south = 2;
-        int west = 3;
-        
         for(GuiObjectEditingReward reward : unplacedRewards) {
             if(!reward.isPlaced()) {
                 continue;
@@ -349,7 +424,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
             }
             
         }
-        if((sides[north] && sides[east] && sides[west] && sides[south])) {
+        if((sides[north] || sides[east] || sides[west] || sides[south])) {
             this.mc.getTextureManager().bindTexture(new ResourceLocation("prestige", "textures/gui/gui_prestige_line.png"));
             if(sides[north]) {
                 GlStateManager.pushMatrix();
@@ -392,7 +467,85 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                 GlStateManager.popMatrix();
             }
         }
+        
+        
+        fontRenderer.drawStringWithShadow("Name: ", fieldName.x, fieldName.y - 11, 0xFFFFFF);
+        fieldName.drawTextBox();
+        fontRenderer.drawStringWithShadow("Description: ", fieldDesc.x, fieldDesc.y - 11, 0xFFFFFF);
+        fieldDesc.drawTextBox();
+        fontRenderer.drawStringWithShadow("Cost: ", fieldCost.x, fieldCost.y - 11, 0xFFFFFF);
+        fieldCost.drawTextBox();
+        fontRenderer.drawStringWithShadow("ID: ", fieldID.x, fieldID.y - 11, 0xFFFFFF);
+        fieldID.drawTextBox();
+        
         super.drawScreen(mouseX, mouseY, partialTicks);
+        buttonCreateNewReward.drawText(mouseX, mouseY);
+        buttonUpdateReward.drawText(mouseX, mouseY);
+        buttonRemoveReward.drawText(mouseX, mouseY);
+        buttonSave.drawText(mouseX, mouseY);
+        buttonReset.drawText(mouseX, mouseY);
+        {
+            int butLeft = this.left + guiWidth + 5 + 18 * 5;
+            int butLeftInner = butLeft + 2;
+            
+            int butRight = this.left + guiWidth + 5 + 18 * 5 + 10;
+            
+            RenderUtils.drawRect(butLeft, this.top + 150, butRight, this.top + 150 + 10, 0xFF111111);
+            RenderUtils.drawRect(butLeftInner, this.top + 150 + 2, butRight - 2, this.top + 150 + 8, 0xFF333333);
+            
+            RenderUtils.drawRect(butLeft, this.top + 150 + (5 * 18) - 10, butRight, this.top + 150 + (5 * 18), 0xFF111111);
+            RenderUtils.drawRect(butLeftInner, this.top + 150 + (5 * 18) - 8, butRight - 2, this.top + 150 + (5 * 18) - 2, 0xFF333333);
+            
+            RenderUtils.drawLineUntextured(butLeft + 5, this.top + 152, butLeft + 2, this.top + 160 - 2, 0, 0.5f, 1, 4);
+            RenderUtils.drawLineUntextured(butLeft + 5, this.top + 152, butLeft + 8, this.top + 160 - 2, 0, 0.5f, 1, 4);
+            RenderUtils.drawLineUntextured(butLeft + 8, this.top + 158, butLeft + 2, this.top + 158, 0, 0.5f, 1, 4);
+            
+            RenderUtils.drawLineUntextured(butLeft + 5, this.top + 150 + (5 * 18) - 2, butLeft + 2, this.top + 144 + (5 * 18) - 2, 0, 0.5f, 1, 4);
+            RenderUtils.drawLineUntextured(butLeft + 5, this.top + 150 + (5 * 18) - 2, butLeft + 8, this.top + 144 + (5 * 18) - 2, 0, 0.5f, 1, 4);
+            RenderUtils.drawLineUntextured(butLeft + 8, this.top + 144 + (5 * 18) - 2, butLeft + 2, this.top + 144 + (5 * 18) - 2, 0, 0.5f, 1, 4);
+        }
+        {
+            
+            int butLeft = this.left - 32;
+            int butLeftInner = this.left - 30;
+            
+            int butRight = this.left - 32 + 10;
+            
+            RenderUtils.drawRect(butLeft, this.top, butRight, this.top + 10, 0xFF111111);
+            RenderUtils.drawRect(butLeftInner, this.top + 2, butRight - 2, this.top + 8, 0xFF333333);
+            
+            RenderUtils.drawRect(butLeft, this.top + guiHeight - 10, butRight, this.top + guiHeight, 0xFF111111);
+            RenderUtils.drawRect(butLeftInner, this.top + guiHeight - 8, butRight - 2, this.top + guiHeight - 2, 0xFF333333);
+            
+            RenderUtils.drawLineUntextured(butLeft + 5, this.top + 2, butLeft + 2, this.top + 8, 0, 0.5f, 1, 4);
+            RenderUtils.drawLineUntextured(butLeft + 5, this.top + 2, butLeft + 8, this.top + 8, 0, 0.5f, 1, 4);
+            RenderUtils.drawLineUntextured(butLeft + 8, this.top + 8, butLeft + 2, this.top + 8, 0, 0.5f, 1, 4);
+            
+            RenderUtils.drawLineUntextured(butLeft + 5, this.top + guiHeight - 2, butLeft + 2, this.top + guiHeight - 8, 0, 0.5f, 1, 4);
+            RenderUtils.drawLineUntextured(butLeft + 5, this.top + guiHeight - 2, butLeft + 8, this.top + guiHeight - 8, 0, 0.5f, 1, 4);
+            RenderUtils.drawLineUntextured(butLeft + 8, this.top + guiHeight - 8, butLeft + 2, this.top + guiHeight - 8, 0, 0.5f, 1, 4);
+        }
+        for(GuiObjectEditingReward reward : unplacedRewards) {
+            if(!reward.equals(selectedReward)) {
+                if(reward.isVisible())
+                    if(reward.collides(mouseX, mouseY)) {
+                        if(reward.getY() >= this.getTop() && reward.getY() + reward.getHeight() <= this.getTop() + this.getGuiHeight()) {
+                            reward.drawText(mouseX, mouseY);
+                        }
+                    }
+            }
+        }
+        
+        for(GuiObjectItemStack stack : stackList) {
+            if(stack.isVisible()) {
+                if(stack.collides(mouseX, mouseY)) {
+                    if(stack.getY() >= top + 150 && stack.getY() + stack.getHeight() <= top + 150 + (5 * 18)) {
+                        stack.drawText(mouseX, mouseY);
+                    }
+                    
+                }
+            }
+        }
     }
     
     @Override
@@ -405,31 +558,58 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
     public void handleMouseInput() throws IOException {
         
         super.handleMouseInput();
+        
+        int x = Mouse.getEventX() * this.width / this.mc.displayWidth;
+        int y = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
         int wheel = Mouse.getDWheel();
         int offset = 0;
-        if(wheel > 0) {
-            if(yOff < 0) {
-                offset = 32;
-                yOff++;
+        if(x > this.left - 96 && x < this.left - 96 + 64) {
+            
+            if(wheel > 0) {
+                if(yOff < -1) {
+                    offset = 32;
+                    yOff++;
+                }
+            } else if(wheel < 0) {
+                if(Math.abs(yOff) < (unplacedRewards.size() - 2) / 2) {
+                    offset = -32;
+                    yOff--;
+                }
             }
-        } else if(wheel < 0) {
-            if(Math.abs(yOff) < unplacedRewards.size() / 2 - (this.getGuiWidth() / 32)) {
-                offset = -32;
-                yOff--;
+            
+            for(GuiObjectEditingReward reward : unplacedRewards) {
+                if(!reward.isPlaced()) {
+                    reward.setY(reward.getY() + offset);
+                }
             }
         }
         
-        for(GuiObjectEditingReward reward : unplacedRewards) {
-            if(!reward.isPlaced()) {
-                reward.setY(reward.getY() + offset);
+        if(y >= top + 150 && y + 18 <= top + 150 + (6 * 18)) {
+            if(x > this.left + guiWidth + 5 && x < this.left + guiWidth + 5 + 18 * 5) {
+                if(wheel > 0 && stackYOff < 0) {
+                    offset = 18;
+                    stackYOff++;
+                } else if(wheel < 0) {
+                    if(Math.abs(stackYOff) < (stackList.size() - 25) / 5) {
+                        offset = -18;
+                        stackYOff--;
+                    }
+                }
+                for(GuiObjectItemStack stack : stackList) {
+                    stack.setY(stack.getY() + offset);
+                }
             }
         }
+        
     }
     
     @Override
-    public void handleKeyboardInput() throws IOException {
-        
-        super.handleKeyboardInput();
+    protected void keyTyped(char typedChar, int keyCode) throws IOException {
+        super.keyTyped(typedChar, keyCode);
+        fieldName.textboxKeyTyped(typedChar, keyCode);
+        fieldDesc.textboxKeyTyped(typedChar, keyCode);
+        fieldCost.textboxKeyTyped(typedChar, keyCode);
+        fieldID.textboxKeyTyped(typedChar, keyCode);
         
     }
     
@@ -441,11 +621,69 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         this.prevMY = mouseY;
         
         if(mouseButton == 0) {
-            backGround.mouseClicked(mouseX, mouseY, mouseButton);
-            informationPanel.mouseClicked(mouseX, mouseY, mouseButton);
-            for(final GuiObject object : this.guiObjects.values()) {
-                object.mouseClicked(mouseX, mouseY, mouseButton);
+            
+            RenderUtils.drawRect(this.left + guiWidth + 5 + 18 * 5, this.top + 150 + (5 * 18) - 10, this.left + guiWidth + 5 + 18 * 5 + 10, this.top + 150 + (5 * 18), 0xFF111111);
+            RenderUtils.drawRect(this.left + guiWidth + 5 + 18 * 5 + 2, this.top + 150 + (5 * 18) - 8, this.left + guiWidth + 5 + 18 * 5 + 10 - 2, this.top + 150 + (5 * 18) - 2, 0xFF333333);
+            boolean clicked = false;
+            int offset = 0;
+            if(mouseX > this.left + guiWidth + 5 + 18 * 5 && mouseX < this.left + guiWidth + 5 + 18 * 5 + 10) {
+                
+                if(mouseY > this.top + 150 + (5 * 18) - 10 && mouseY < this.top + 150 + (5 * 18)) {
+                    if(Math.abs(stackYOff) < (stackList.size() - 25) / 5) {
+                        stackYOff--;
+                        offset = -18;
+                        clicked = true;
+                    }
+                }
+                
+                if(mouseY > this.top + 150 && mouseY < this.top + 150 + 10) {
+                    if(stackYOff < 0) {
+                        stackYOff++;
+                        offset = 18;
+                        clicked = true;
+                    }
+                }
+                
+                if(clicked) {
+                    for(GuiObjectItemStack stack : stackList) {
+                        stack.setY(stack.getY() + offset);
+                    }
+                }
             }
+            
+            if(mouseX > this.left - 32 && mouseX < this.left - 32 + 10) {
+                
+                if(mouseY > this.top && mouseY < this.top + 10) {
+                    if(Math.abs(yOff) < (unplacedRewards.size() - 2) / 2) {
+                        yOff--;
+                        offset = -32;
+                        clicked = true;
+                    }
+                }
+                if(mouseY < this.top + guiHeight && mouseY > this.top + guiHeight - 10) {
+                    if(yOff < -1) {
+                        yOff++;
+                        offset = 32;
+                        clicked = true;
+                    }
+                }
+                
+                if(clicked) {
+                    for(GuiObjectEditingReward reward : unplacedRewards) {
+                        if(!reward.isPlaced()) {
+                            reward.setY(reward.getY() + offset);
+                        }
+                    }
+                }
+            }
+            if(!clicked) {
+                backGround.mouseClicked(mouseX, mouseY, mouseButton);
+                for(final GuiObject object : this.guiObjects.values()) {
+                    object.mouseClicked(mouseX, mouseY, mouseButton);
+                }
+            }
+            
+            stackList.forEach(stack->stack.mouseClicked(mouseX, mouseY, mouseButton));
         }
         
         boolean successful = false;
@@ -455,47 +693,68 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                     continue;
                 }
                 if(mouseButton == 0) {
+                    if(editingReward != null && !backGround.collides(mouseX, mouseY, mouseX, mouseY)) {
+                        selectedReward = reward;
+                        selectedReward.setPlaced(false);
+                        successful = true;
+                    }
                     if(editingReward == null) {
                         selectedReward = reward;
                         selectedReward.setPlaced(false);
                         successful = true;
                     } else if(backGround.collides(mouseX, mouseY, mouseX, mouseY)) {
-                        List<GuiObjectEditingReward> list = connections.getOrDefault(editingReward, new LinkedList<>());
-                        if(list.contains(reward)) {
-                            list.remove(reward);
+                        Set<Reward> children = editingReward.getReward().getChildren();
+                        if(children.contains(reward.getReward())) {
+                            editingReward.getReward().removeChild(reward.getReward());
                         } else {
-                            list.add(reward);
+                            editingReward.getReward().addChild(reward.getReward());
                         }
-                        connections.put(editingReward, list);
+                        successful = true;
                     }
                 } else if(mouseButton == 1 && selectedReward == null && reward.isPlaced()) {
                     if(reward.equals(editingReward)) {
                         editingReward = null;
                     } else {
                         editingReward = reward;
+                        fieldName.setText(editingReward.getReward().getTitle());
+                        fieldCost.setText(editingReward.getReward().getCost() + "");
+                        fieldDesc.setText(editingReward.getReward().getDescription());
+                        fieldID.setText(editingReward.getReward().getIdentifier());
+                        selectedStack = getStack(editingReward.getReward().getIcon());
                     }
                     successful = true;
                 }
             }
         }
-        if(!successful) {
-            if(!Keyboard.isKeyDown(Keyboard.KEY_LSHIFT))
-                editingReward = null;
+        if(fieldName.mouseClicked(mouseX, mouseY, mouseButton)) {
+            successful = true;
         }
+        if(fieldDesc.mouseClicked(mouseX, mouseY, mouseButton)) {
+            successful = true;
+        }
+        if(fieldCost.mouseClicked(mouseX, mouseY, mouseButton)) {
+            successful = true;
+        }
+        if(fieldID.mouseClicked(mouseX, mouseY, mouseButton)) {
+            successful = true;
+        }
+        
+        if(!successful) {
+            editingReward = null;
+        }
+        
     }
+    
     
     @Override
     protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
         
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+        
         if(selectedReward == null && editingReward == null) {
             backGround.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-            informationPanel.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
             
             
-            for(final GuiObject object : this.guiObjects.values()) {
-                object.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-            }
             for(GuiObjectEditingReward object : this.unplacedRewards) {
                 if(object.isPlaced()) {
                     object.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
@@ -517,7 +776,6 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         this.prevMX = -1;
         this.prevMY = -1;
         backGround.mouseReleased(mouseX, mouseY, state);
-        informationPanel.mouseReleased(mouseX, mouseY, state);
         for(final GuiObject object : this.guiObjects.values()) {
             object.mouseReleased(mouseX, mouseY, state);
         }
@@ -529,10 +787,14 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                 selectedReward.setX(this.left - 96 + (selectedReward.getGridX() * 32));
                 selectedReward.setY(this.top + (selectedReward.getGridY() + yOff) * 32);
                 selectedReward.setVisible(true);
-                connections.remove(selectedReward);
-                connections.values().forEach(l -> l.remove(selectedReward));
-                selectedReward.getReward().getChildren().stream().forEach(rew -> rew.getParents().remove(selectedReward.getReward()));
-                selectedReward.getReward().getChildren().clear();
+                for(Reward parent : selectedReward.getReward().getParents()) {
+                    parent.removeChild(selectedReward.getReward());
+                }
+                for(Reward child : selectedReward.getReward().getChildren()) {
+                    child.removeParent(selectedReward.getReward());
+                }
+                selectedReward.getReward().clearParents();
+                selectedReward.getReward().clearChildren();
                 
             }
             selectedReward.setMoving(false);
@@ -540,45 +802,76 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         }
     }
     
-    public int getPrevMX() {
-        
-        return this.prevMX;
-    }
-    
-    public int getPrevMY() {
-        
-        return this.prevMY;
-    }
-    
-    public int getGuiWidth() {
-        
-        return this.guiWidth;
-    }
-    
-    public int getGuiHeight() {
-        
-        return this.guiHeight;
-    }
-    
-    public int getLeft() {
-        
-        return this.left;
-    }
-    
-    public int getTop() {
-        
-        return this.top;
-    }
     
     @Override
-    public Map<String, GuiObject> getGuiObjects() {
-        return super.getGuiObjects();
+    protected void actionPerformed(GuiButton button) throws IOException {
+        super.actionPerformed(button);
+        String id = fieldID.getText();
+        if(button.id != buttonSave.id && button.id != buttonReset.id) {
+            if(id.isEmpty()) {
+                return;
+            }
+        }
+        if(button.id == buttonCreateNewReward.id) {
+            if(!Prestige.REGISTRY.containsKey(id)) {
+                if(fieldCost.getText().isEmpty()) {
+                    fieldCost.setText(0 + "");
+                }
+                Prestige.REGISTRY.put(id, new Reward(id, fieldName.getText(), 0, 0, Integer.parseInt(fieldCost.getText()), selectedStack.getStack(), fieldDesc.getText()));
+            }
+        }
+        if(button.id == buttonRemoveReward.id) {
+            if(Prestige.REGISTRY.containsKey(id)) {
+                Reward removed = Prestige.REGISTRY.get(id);
+                
+                for(Reward reward : Prestige.REGISTRY.values()) {
+                    reward.removeParent(removed);
+                    reward.removeChild(removed);
+                }
+                removed.clearParents();
+                removed.clearChildren();
+                Prestige.REGISTRY.remove(id);
+            }
+        }
+        if(button.id == buttonUpdateReward.id) {
+            if(Prestige.REGISTRY.containsKey(id)) {
+                if(fieldCost.getText().isEmpty()) {
+                    fieldCost.setText(0 + "");
+                }
+                Reward updated = Prestige.REGISTRY.get(id);
+                updated.setTitle(fieldName.getText());
+                updated.setDescription(fieldDesc.getText());
+                updated.setCost(Integer.parseInt(fieldCost.getText()));
+                updated.setIcon(selectedStack.getStack());
+            }
+        }
+        if(button.id == buttonSave.id) {
+            Prestige.INSTANCE.saveRewards();
+        }
+        if(button.id == buttonReset.id) {
+            Prestige.INSTANCE.loadRewards();
+            generateRewards();
+        }
+        
+        
+        yOff = 0;
+        generateRewards();
     }
     
-    public GuiObjectEditingReward getEditingObject(String identifier) {
+    
+    public GuiObjectEditingReward getObject(String identifier) {
         for(GuiObjectEditingReward reward : unplacedRewards) {
             if(reward.getReward().getIdentifier().equals(identifier)) {
                 return reward;
+            }
+        }
+        return null;
+    }
+    
+    public GuiObjectItemStack getStack(ItemStack stack) {
+        for(GuiObjectItemStack itemStack : stackList) {
+            if(itemStack.getStack().isItemEqual(stack)) {
+                return itemStack;
             }
         }
         return null;
@@ -588,7 +881,4 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         return editingReward;
     }
     
-    public GuiObjectInformation getInformationPanel() {
-        return informationPanel;
-    }
 }

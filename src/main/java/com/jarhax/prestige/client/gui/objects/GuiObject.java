@@ -45,6 +45,9 @@ public abstract class GuiObject {
         return this.collides(other.getX(), other.getY(), other.getX() + other.getWidth(), other.getY() + other.getHeight());
     }
     
+    public boolean collides(float x, float y){
+        return collides(x,y,x,y);
+    }
     public boolean collides(float x1, float y1, float x2, float y2) {
         
         if(x2 > getX() && x1 < getX() + getWidth()) {
@@ -158,6 +161,25 @@ public abstract class GuiObject {
     public void addY(float y){
         setY(getY() + y);
     }
+    
+    
+    
+    public float getCentreX(){
+        return getX2()/2;
+    }
+    
+    public float getCentreY(){
+        return getY2()/2;
+    }
+    
+    public float getX2(){
+        return getX() + getWidth();
+    }
+    
+    public float getY2(){
+        return getY() + getHeight();
+    }
+    
     
     
 }

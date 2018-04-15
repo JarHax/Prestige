@@ -32,6 +32,17 @@ public class GuideLine {
         this.minX = minX;
     }
     
+    public void setX(double x) {
+        setMinX(x);
+        setMaxX(x);
+    }
+    
+    public void setY(double y) {
+        setMinY(y);
+        setMaxY(y);
+    }
+    
+    
     public double getMaxX() {
         return maxX;
     }

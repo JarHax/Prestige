@@ -18,7 +18,6 @@ public class GuiObjectEditingReward extends GuiObject {
     private int gridY;
     
     private boolean moving;
-    private boolean drawLines = true;
     
     public GuiObjectEditingReward(GuiPrestigeBase parent, int x, int y, int width, int height, Reward reward) {
         
@@ -26,7 +25,7 @@ public class GuiObjectEditingReward extends GuiObject {
         this.reward = reward;
         setX(x);
         setY(y);
-    
+        
     }
     
     public GuiObjectEditingReward(GuiPrestigeBase parent, Reward reward) {
@@ -35,7 +34,7 @@ public class GuiObjectEditingReward extends GuiObject {
         this.reward = reward;
         setX(reward.getX());
         setY(reward.getY());
-    
+        
     }
     
     public GuiObjectEditingReward(GuiPrestigeBase parent, int x, int y, Reward reward) {
@@ -44,7 +43,7 @@ public class GuiObjectEditingReward extends GuiObject {
         this.reward = reward;
         setX(x);
         setY(y);
-    
+        
     }
     
     @Override
@@ -57,14 +56,11 @@ public class GuiObjectEditingReward extends GuiObject {
     public void draw(int left, int top, int mouseX, int mouseY, float partialTicks) {
         
         this.mc.getTextureManager().bindTexture(BACKGROUND);
-        
-        
+    
+        GlStateManager.enableBlend();
+        GlStateManager.blendFunc(770, 771);
         if(!isPlaced()) {
-            GlStateManager.enableBlend();
-            GlStateManager.blendFunc(770, 771);
             RenderUtils.drawTexturedModalRect(getX(), getY(), 0, 0, this.getWidth(), this.getHeight());
-            GlStateManager.disableBlend();
-            
             renderIcon();
         } else {
             
@@ -77,7 +73,6 @@ public class GuiObjectEditingReward extends GuiObject {
             if(this.getY() < this.getParent().getTop()) {
                 offsetY = this.getParent().getTop() - getY();
             }
-            drawLines = offsetX == 0 && offsetY == 0;
             if(offsetX != 0 || offsetY != 0) {
                 RenderUtils.drawTexturedModalRect(getX() + offsetX, getY() + offsetY, offsetX, offsetY, this.getWidth() - offsetX, this.getHeight() - offsetY);
             } else {
@@ -87,7 +82,6 @@ public class GuiObjectEditingReward extends GuiObject {
                 if(this.getY() + getHeight() > this.getParent().getTop() + this.getParent().getGuiHeight()) {
                     offsetY = (this.getParent().getTop() + this.getParent().getGuiHeight()) - (getY() + getHeight());
                 }
-                drawLines = offsetX == 0 && offsetY == 0;
                 if(offsetX != 0 || offsetY != 0) {
                     RenderUtils.drawTexturedModalRect(getX(), getY(), 0, 0, this.getWidth() + offsetX, this.getHeight() + offsetY);
                 } else {
@@ -121,12 +115,15 @@ public class GuiObjectEditingReward extends GuiObject {
     
     public void drawText(int mouseX, int mouseY) {
         GL11.glPushMatrix();
+        GlStateManager.translate(0, 0, 500);
         GlStateManager.disableAlpha();
         GlStateManager.enableLighting();
         List<String> text = new LinkedList<>();
         text.add(reward.getTitle());
         text.add("");
         text.add("- " + reward.getDescription());
+        text.add("- costs: " + reward.getCost());
+    
         getParent().drawHoveringText(text, mouseX, mouseY);
         GlStateManager.disableLighting();
         GlStateManager.enableAlpha();
@@ -193,11 +190,6 @@ public class GuiObjectEditingReward extends GuiObject {
     
     public void setMoving(boolean moving) {
         this.moving = moving;
-    }
-    
-    
-    public boolean shouldDrawLines() {
-        return drawLines;
     }
     
     

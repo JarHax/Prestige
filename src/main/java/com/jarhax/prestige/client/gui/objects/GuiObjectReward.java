@@ -13,23 +13,18 @@ public class GuiObjectReward extends GuiObject {
     
     private static final ResourceLocation BACKGROUND = new ResourceLocation("prestige", "textures/gui/gui_prestige_icons.png");
     private final Reward reward;
-    
-    private boolean brought;
-    
-    private boolean drawLines = true;
+    private boolean purchased;
     
     public GuiObjectReward(GuiPrestigeBase parent, int x, int y, int width, int height, Reward reward) {
         
         super(parent, x, y, width, height);
         this.reward = reward;
-        this.brought = false;
     }
     
-    public GuiObjectReward(GuiPrestigeBase parent, int x, int y, Reward reward) {
+    public GuiObjectReward(GuiPrestigeBase parent, Reward reward) {
         
-        super(parent, x, y, 32, 32);
+        super(parent, reward.getX(), reward.getY(), 32, 32);
         this.reward = reward;
-        this.brought = false;
     }
     
     @Override
@@ -41,54 +36,26 @@ public class GuiObjectReward extends GuiObject {
     @Override
     public void draw(int left, int top, int mouseX, int mouseY, float partialTicks) {
         
-        if(!isBrought()) {
-            GlStateManager.color(0.5f, 0.5f, 0.5f, 1f);
-        }
         this.mc.getTextureManager().bindTexture(BACKGROUND);
-        float offsetX = 0;
-        float offsetY = 0;
-        if(this.getX() < this.getParent().getLeft()) {
-            offsetX = this.getParent().getLeft() - getX();
+        if(isPurchased()) {
+            GlStateManager.color(0, 0.8f, 0.8f);
+        } else if(!parent.data.canPurchase(getReward())) {
+            GlStateManager.color(0.8f, 0f, 0f);
         }
-        if(this.getY() < this.getParent().getTop()) {
-            offsetY = this.getParent().getTop() - getY();
+        GlStateManager.enableBlend();
+        GlStateManager.blendFunc(770, 771);
+       
+        this.mc.getTextureManager().bindTexture(BACKGROUND);
+        RenderUtils.drawTexturedModalRect(getX(), getY(), 0, 0, this.getWidth(), this.getHeight());
+        if(isPurchased() || !parent.data.canPurchase(getReward())) {
+            GlStateManager.color(1, 1f, 1f);
         }
-        drawLines = offsetX == 0 && offsetY == 0;
-        if(offsetX != 0 || offsetY != 0) {
-            RenderUtils.drawTexturedModalRect(getX() + offsetX, getY() + offsetY, offsetX, offsetY, this.getWidth() - offsetX, this.getHeight() - offsetY);
-        } else {
-            if(this.getX() + getWidth() > this.getParent().getLeft() + this.getParent().getGuiWidth()) {
-                offsetX = (this.getParent().getLeft() + this.getParent().getGuiWidth()) - (getX() + getWidth());
-            }
-            if(this.getY() + getHeight() > this.getParent().getTop() + this.getParent().getGuiHeight()) {
-                offsetY = (this.getParent().getTop() + this.getParent().getGuiHeight()) - (getY() + getHeight());
-            }
-            drawLines = offsetX == 0 && offsetY == 0;
-            if(offsetX != 0 || offsetY != 0) {
-                RenderUtils.drawTexturedModalRect(getX(), getY(), 0, 0, this.getWidth() + offsetX, this.getHeight() + offsetY);
-            } else {
-                RenderUtils.drawTexturedModalRect(getX(), getY(), 0, 0, this.getWidth(), this.getHeight());
-            }
-            
-        }
-        if(!isBrought()) {
-            GlStateManager.color(1, 1, 1, 1f);
-        }
-        if(getX() + 8 > getParent().getLeft() && getX() + getWidth() - 8 < getParent().getLeft() + getParent().getGuiWidth()) {
-            if(getY() + 8 > getParent().getTop() && getY() + getHeight() - 8 < getParent().getTop() + getParent().getGuiHeight()) {
-                renderIcon();
-            }
-        }
-        
+        renderIcon();
         if(collides(mouseX, mouseY, mouseX, mouseY)) {
             drawText(mouseX, mouseY);
         }
     }
     
-    
-    public boolean shouldDrawLines() {
-        return drawLines;
-    }
     
     public void renderIcon() {
         GL11.glPushMatrix();
@@ -103,16 +70,17 @@ public class GuiObjectReward extends GuiObject {
     
     public void drawText(int mouseX, int mouseY) {
         GL11.glPushMatrix();
+        GlStateManager.translate(0, 0, 500);
         GlStateManager.disableAlpha();
-        GlStateManager.disableBlend();
         GlStateManager.enableLighting();
         List<String> text = new LinkedList<>();
         text.add(reward.getTitle());
         text.add("");
         text.add("- " + reward.getDescription());
+        text.add("- costs: " + reward.getCost());
+        
         getParent().drawHoveringText(text, mouseX, mouseY);
         GlStateManager.disableLighting();
-        GlStateManager.enableBlend();
         GlStateManager.enableAlpha();
         GL11.glPopMatrix();
     }
@@ -122,35 +90,48 @@ public class GuiObjectReward extends GuiObject {
     public void mouseClicked(int mouseX, int mouseY, int mouseButton) {
         
         super.mouseClicked(mouseX, mouseY, mouseButton);
-        if(collides(mouseX, mouseY, mouseX, mouseY))
-            brought = !brought;
+        if(collides(mouseX, mouseY, mouseX, mouseY)) {
+            if(parent.data.canPurchase(getReward())) {
+                //TODO send network packet updating the server
+                parent.data.unlockReward(getReward());
+                setPurchased(true);
+                parent.data.removePrestige(getReward().getCost());
+                
+            }
+        }
     }
     
     @Override
     public void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
         
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-        // if(mouseX >= parent.getLeft() && mouseX <= parent.getLeft() + parent.getGuiWidth())
-        // {
-        // if(mouseY >= parent.getTop() && mouseY <= parent.getTop() + parent.getGuiHeight()) {
-        this.x += (this.getParent().getPrevMX() - mouseX) / 1.5;
-        this.y += (this.getParent().getPrevMY() - mouseY) / 1.5;
-        // }
-        // }
+        addX((((float) this.getParent().getPrevMX() - mouseX)) / 1.5f);
+        addY((((float) this.getParent().getPrevMY() - mouseY)) / 1.5f);
+        
+        setX(Math.round(x));
+        setY(Math.round(y));
     }
     
     @Override
     public void mouseReleased(int mouseX, int mouseY, int state) {
         
         super.mouseReleased(mouseX, mouseY, state);
+        
     }
     
     public Reward getReward() {
         return reward;
     }
     
-    public boolean isBrought() {
-        return brought;
+    public boolean isPlaced() {
+        return reward.isPlaced();
     }
     
+    public boolean isPurchased() {
+        return purchased;
+    }
+    
+    public void setPurchased(boolean purchased) {
+        this.purchased = purchased;
+    }
 }

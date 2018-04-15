@@ -1,13 +1,15 @@
 package com.jarhax.prestige.client.gui;
 
 import com.jarhax.prestige.client.gui.objects.*;
+import com.jarhax.prestige.data.*;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.entity.player.EntityPlayer;
 
 import java.util.Map;
 
 public class GuiPrestigeBase extends GuiScreen {
     
-    protected Map<String, GuiObject> guiObjects;
+    protected Map<String, GuiObjectReward> guiObjects;
     
     protected int guiWidth;
     protected int guiHeight;
@@ -17,7 +19,10 @@ public class GuiPrestigeBase extends GuiScreen {
     protected int prevMX;
     protected int prevMY;
     
-    public Map<String, GuiObject> getGuiObjects() {
+    public EntityPlayer player;
+    public PlayerData data;
+    
+    public Map<String, GuiObjectReward> getGuiObjects() {
         return guiObjects;
     }
     
