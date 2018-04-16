@@ -683,7 +683,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                 }
             }
             
-            stackList.forEach(stack->stack.mouseClicked(mouseX, mouseY, mouseButton));
+            stackList.stream().filter(stack -> stack.getY() >= top + 150 && stack.getY() + stack.getHeight() <= top + 150 + (5 * 18)).forEach(stack -> stack.mouseClicked(mouseX, mouseY, mouseButton));
         }
         
         boolean successful = false;
