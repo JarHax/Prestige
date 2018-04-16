@@ -701,7 +701,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                         selectedReward = reward;
                         selectedReward.setPlaced(false);
                         successful = true;
-                    } else if(backGround.collides(mouseX, mouseY, mouseX, mouseY)) {
+                    } else if(backGround.collides(mouseX, mouseY, mouseX, mouseY) && !reward.equals(editingReward)) {
                         Set<Reward> children = editingReward.getReward().getChildren();
                         if(children.contains(reward.getReward())) {
                             editingReward.getReward().removeChild(reward.getReward());
@@ -749,7 +749,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
     protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
         
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-        
+        //TODO make sure background only collision is what is wanted
         if(selectedReward == null && editingReward == null && backGround.collides(mouseX, mouseY)) {
             backGround.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
             
