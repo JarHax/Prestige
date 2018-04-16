@@ -65,8 +65,8 @@ public class GuiObjectBackGround extends GuiObject {
         // offsetY = Math.min(offsetY, 20);
         // offsetY = Math.max(offsetY, -20);
 
-        this.offsetAltX += (this.getParent().getPrevMX() - mouseX) / 2f;
-        this.offsetAltY += (this.getParent().getPrevMY() - mouseY) / 2f;
+        this.offsetAltX += (this.getParent().getPrevMX() - mouseX) / 2.75f;
+        this.offsetAltY += (this.getParent().getPrevMY() - mouseY) / 2.75f;
 
         // offsetAltX = Math.min(offsetX, 60);
         // offsetAltX = Math.max(offsetX, -60);
