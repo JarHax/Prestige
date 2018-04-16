@@ -15,7 +15,7 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -52,6 +52,9 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
     private final int west = 3;
     
     public GuiObjectItemStack selectedStack;
+    
+    public static final File FILE_TEMP = new File(Prestige.JSON_FILE.getParentFile(), "backup_file.json");
+    public boolean saveChanges;
     
     public void generateRewards() {
         unplacedRewards.clear();
@@ -155,8 +158,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         this.addButton(buttonUpdateReward);
         this.addButton(buttonSave);
         this.addButton(buttonReset);
-        
-        
+    
     }
     
     @Override
@@ -203,6 +205,11 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
             buttonCreateNewReward.visible = true;
         } else {
             buttonCreateNewReward.visible = false;
+        }
+        
+        if(saveChanges){
+            saveChanges = false;
+            saveTempFile();
         }
     }
     
@@ -563,39 +570,44 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         int wheel = Mouse.getDWheel();
         int offset = 0;
         if(x > this.left - 96 && x < this.left - 96 + 64) {
-            
-            if(wheel > 0) {
-                if(yOff < 0) {
-                    offset = 32;
-                    yOff++;
+            if(wheel!=0) {
+                if(wheel > 0) {
+                    if(yOff < 0) {
+                        offset = 32;
+                        yOff++;
+                    }
+                } else {
+                    if(Math.abs(yOff) < (unplacedRewards.size() - 2) / 2) {
+                        offset = -32;
+                        yOff--;
+                    }
                 }
-            } else if(wheel < 0) {
-                if(Math.abs(yOff) < (unplacedRewards.size() - 2) / 2) {
-                    offset = -32;
-                    yOff--;
+    
+                for(GuiObjectEditingReward reward : unplacedRewards) {
+                    if(!reward.isPlaced()) {
+                        reward.setY(reward.getY() + offset);
+                    }
                 }
-            }
-            
-            for(GuiObjectEditingReward reward : unplacedRewards) {
-                if(!reward.isPlaced()) {
-                    reward.setY(reward.getY() + offset);
-                }
+                saveChanges = true;
             }
         }
         
         if(y >= top + 150 && y + 18 <= top + 150 + (6 * 18)) {
             if(x > this.left + guiWidth + 5 && x < this.left + guiWidth + 5 + 18 * 5) {
-                if(wheel > 0 && stackYOff < 0) {
-                    offset = 18;
-                    stackYOff++;
-                } else if(wheel < 0) {
-                    if(Math.abs(stackYOff) < (stackList.size() - 25) / 5) {
-                        offset = -18;
-                        stackYOff--;
+                if(wheel!=0) {
+                    if(wheel > 0 && stackYOff < 0) {
+                        offset = 18;
+                        stackYOff++;
+                    } else if(wheel < 0) {
+                        if(Math.abs(stackYOff) < (stackList.size() - 25) / 5) {
+                            offset = -18;
+                            stackYOff--;
+                        }
                     }
-                }
-                for(GuiObjectItemStack stack : stackList) {
-                    stack.setY(stack.getY() + offset);
+                    for(GuiObjectItemStack stack : stackList) {
+                        stack.setY(stack.getY() + offset);
+                    }
+                    saveChanges = true;
                 }
             }
         }
@@ -609,7 +621,6 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         fieldDesc.textboxKeyTyped(typedChar, keyCode);
         fieldCost.textboxKeyTyped(typedChar, keyCode);
         fieldID.textboxKeyTyped(typedChar, keyCode);
-        
     }
     
     @Override
@@ -683,6 +694,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
             }
             
             stackList.stream().filter(stack -> stack.getY() >= top + 150 && stack.getY() + stack.getHeight() <= top + 150 + (5 * 18)).forEach(stack -> stack.mouseClicked(mouseX, mouseY, mouseButton));
+            saveChanges = true;
         }
         
         boolean successful = false;
@@ -740,6 +752,8 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         
         if(!successful) {
             editingReward = null;
+        }else{
+            saveChanges = true;
         }
         
     }
@@ -759,7 +773,6 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                     object.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
                 }
             }
-            
         } else if(selectedReward != null) {
             selectedReward.setMoving(true);
         }
@@ -799,6 +812,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
             selectedReward.setMoving(false);
             selectedReward = null;
         }
+        saveChanges = true;
     }
     
     @Override
@@ -848,12 +862,13 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         }
         if(button.id == buttonReset.id) {
             Prestige.INSTANCE.loadRewards();
-            generateRewards();
+//            generateRewards();
         }
         
         
         yOff = 0;
         generateRewards();
+        saveChanges = true;
     }
     
     
@@ -879,4 +894,23 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         return editingReward;
     }
     
+    
+    public void saveTempFile() {
+        //TODO look into the performance impact
+        System.out.println("saving");
+        try {
+            if(!FILE_TEMP.exists()) {
+                FILE_TEMP.getParentFile().mkdirs();
+                FILE_TEMP.createNewFile();
+            }
+            BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_TEMP));
+            
+            
+            String json = Prestige.GSON.toJson(Prestige.REGISTRY.values().toArray());
+            writer.write(json);
+            writer.close();
+        } catch(Exception e) {
+            Prestige.LOG.error("Unable to save Prestige backup JSON file!", e);
+        }
+    }
 }
