@@ -750,7 +750,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
         
-        if(selectedReward == null && editingReward == null) {
+        if(selectedReward == null && editingReward == null && backGround.collides(mouseX, mouseY)) {
             backGround.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
             
             
@@ -800,7 +800,6 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
             selectedReward = null;
         }
     }
-    
     
     @Override
     protected void actionPerformed(GuiButton button) throws IOException {
