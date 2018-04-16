@@ -28,15 +28,17 @@ public class GuiButtonTooltip extends GuiButton {
     }
     
     public void drawText(int mouseX, int mouseY) {
-        GlStateManager.pushMatrix();
-        
-        GlStateManager.enableLighting();
-        if(mouseX > x && mouseX < x + width) {
-            if(mouseY > y && mouseY < y + height) {
-                parent.drawHoveringText(text, mouseX, mouseY);
+        if(visible) {
+            GlStateManager.pushMatrix();
+    
+            GlStateManager.enableLighting();
+            if(mouseX > x && mouseX < x + width) {
+                if(mouseY > y && mouseY < y + height) {
+                    parent.drawHoveringText(text, mouseX, mouseY);
+                }
             }
+            GlStateManager.disableLighting();
+            GlStateManager.popMatrix();
         }
-        GlStateManager.disableLighting();
-        GlStateManager.popMatrix();
     }
 }
