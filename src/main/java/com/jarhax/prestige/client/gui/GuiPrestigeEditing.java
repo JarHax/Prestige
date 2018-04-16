@@ -8,7 +8,6 @@ import com.jarhax.prestige.client.utils.RenderUtils;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.init.Items;
 import net.minecraft.item.*;
 import net.minecraft.util.*;
 import net.minecraft.util.math.Vec3d;
@@ -251,10 +250,10 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
             }
             if(stack.getY() >= top + 150 && stack.getY() + stack.getHeight() <= top + 150 + (5 * 18)) {
                 if(selectedStack.equals(stack)) {
-                    RenderUtils.drawLineUntextured(stack.getX(), stack.getY(), stack.getX2()-2, stack.getY(), 0f, 0.8f, 0.8f, 2);
-                    RenderUtils.drawLineUntextured(stack.getX(), stack.getY2()-2, stack.getX2()-2, stack.getY2()-2, 0f, 0.8f, 0.8f, 2);
-                    RenderUtils.drawLineUntextured(stack.getX(), stack.getY(), stack.getX(), stack.getY2()-2, 0f, 0.8f, 0.8f, 2);
-                    RenderUtils.drawLineUntextured(stack.getX2()-2, stack.getY(), stack.getX2()-2, stack.getY2()-2, 0f, 0.8f, 0.8f, 2);
+                    RenderUtils.drawLineUntextured(stack.getX(), stack.getY(), stack.getX2() - 2, stack.getY(), 0f, 0.8f, 0.8f, 2);
+                    RenderUtils.drawLineUntextured(stack.getX(), stack.getY2() - 2, stack.getX2() - 2, stack.getY2() - 2, 0f, 0.8f, 0.8f, 2);
+                    RenderUtils.drawLineUntextured(stack.getX(), stack.getY(), stack.getX(), stack.getY2() - 2, 0f, 0.8f, 0.8f, 2);
+                    RenderUtils.drawLineUntextured(stack.getX2() - 2, stack.getY(), stack.getX2() - 2, stack.getY2() - 2, 0f, 0.8f, 0.8f, 2);
                 }
                 stack.draw(left, top, mouseX, mouseY, partialTicks);
             }
@@ -566,7 +565,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         if(x > this.left - 96 && x < this.left - 96 + 64) {
             
             if(wheel > 0) {
-                if(yOff < -1) {
+                if(yOff < 0) {
                     offset = 32;
                     yOff++;
                 }
