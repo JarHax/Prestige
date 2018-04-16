@@ -1,18 +1,15 @@
 package com.jarhax.prestige.data;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 
 import com.jarhax.prestige.Prestige;
 import com.jarhax.prestige.api.Reward;
 
+import net.darkhax.bookshelf.util.NBTUtils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
 import net.minecraftforge.common.util.Constants.NBT;
 
 public class PlayerData {
@@ -44,8 +41,8 @@ public class PlayerData {
 
         this.playerId = tag.getUniqueId(TAG_OWNER);
         this.prestige = tag.getLong(TAG_CONFIRMED);
-        this.unlockedRewards = (Set<Reward>) readCollection(new HashSet<Reward>(), tag.getTagList(TAG_UNLOCKED, NBT.TAG_STRING), Prestige.REGISTRY::get);
-        this.sources = (Set<String>) readCollection(new HashSet<String>(), tag.getTagList(TAG_SOURCES, NBT.TAG_STRING), string -> string);
+        this.unlockedRewards = (Set<Reward>) NBTUtils.readCollection(new HashSet<Reward>(), tag.getTagList(TAG_UNLOCKED, NBT.TAG_STRING), Prestige.REGISTRY::get);
+        this.sources = (Set<String>) NBTUtils.readCollection(new HashSet<String>(), tag.getTagList(TAG_SOURCES, NBT.TAG_STRING), string -> string);
     }
 
     public NBTTagCompound save () {
@@ -54,36 +51,13 @@ public class PlayerData {
 
         tag.setUniqueId(TAG_OWNER, this.playerId);
         tag.setLong(TAG_CONFIRMED, this.prestige);
-        tag.setTag(TAG_UNLOCKED, writeCollection(this.unlockedRewards, Reward::getIdentifier));
-        tag.setTag(TAG_SOURCES, writeCollection(this.sources, string -> string));
+        tag.setTag(TAG_UNLOCKED, NBTUtils.writeCollection(this.unlockedRewards, Reward::getIdentifier));
+        tag.setTag(TAG_SOURCES, NBTUtils.writeCollection(this.sources, string -> string));
 
         return tag;
     }
 
-    // TODO put in Bookshelf
-    public static <T extends Object> Collection<T> readCollection (Collection<T> collection, NBTTagList list, Function<String, T> func) {
 
-        for (int index = 0; index < list.tagCount(); index++) {
-
-            final String string = list.getStringTagAt(index);
-            collection.add(func.apply(string));
-        }
-
-        return collection;
-    }
-
-    // TODO put in bookshelf
-    public static <T extends Object> NBTTagList writeCollection (Collection<T> collection, Function<T, String> func) {
-
-        final NBTTagList tagList = new NBTTagList();
-
-        for (final T t : collection) {
-
-            tagList.appendTag(new NBTTagString(func.apply(t)));
-        }
-
-        return tagList;
-    }
 
     public UUID getPlayerId () {
 
