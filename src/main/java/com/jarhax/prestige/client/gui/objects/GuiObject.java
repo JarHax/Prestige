@@ -165,11 +165,11 @@ public abstract class GuiObject {
     
     
     public float getCentreX(){
-        return getX2()/2;
+        return getX2() + getWidth()/2;
     }
     
     public float getCentreY(){
-        return getY2()/2;
+        return getY2() + getHeight()/2;
     }
     
     public float getX2(){

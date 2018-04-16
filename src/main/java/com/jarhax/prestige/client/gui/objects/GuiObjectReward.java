@@ -105,8 +105,8 @@ public class GuiObjectReward extends GuiObject {
     public void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
         
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-        addX((((float) this.getParent().getPrevMX() - mouseX)) / 1.5f);
-        addY((((float) this.getParent().getPrevMY() - mouseY)) / 1.5f);
+        addX(-(((float) this.getParent().getPrevMX() - mouseX)) / 1.5f);
+        addY(-(((float) this.getParent().getPrevMY() - mouseY)) / 1.5f);
         
         setX(Math.round(x));
         setY(Math.round(y));
