@@ -12,7 +12,7 @@ import net.minecraft.item.*;
 import net.minecraft.util.*;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
-import org.lwjgl.input.Mouse;
+import org.lwjgl.input.*;
 import org.lwjgl.opengl.GL11;
 
 import java.io.*;
@@ -71,6 +71,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                 rew = new GuiObjectEditingReward(this, this.left - 96 + (offX * 32), this.top + offY * 32, reward);
                 rew.setPlaced(false);
             }
+            System.out.println(rew.getReward().getIcon());
             this.unplacedRewards.add(rew);
             rew.setGridX(offX);
             rew.setGridY(offY);
@@ -158,7 +159,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         this.addButton(buttonUpdateReward);
         this.addButton(buttonSave);
         this.addButton(buttonReset);
-    
+        
     }
     
     @Override
@@ -207,7 +208,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
             buttonCreateNewReward.visible = false;
         }
         
-        if(saveChanges){
+        if(saveChanges) {
             saveChanges = false;
             saveTempFile();
         }
@@ -226,6 +227,10 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         for(GuiObjectEditingReward parent : unplacedRewards) {
             Vec3d start = new Vec3d(parent.getX() + parent.getWidth() / 2, parent.getY() + parent.getHeight() / 2, 0);
             for(Reward child : parent.getReward().getChildren()) {
+                if(child == null || child.getIdentifier() == null) {
+                    Prestige.LOG.error("Child was not found! Please notify their parent: " + parent.getReward().getIdentifier());
+                    continue;
+                }
                 GuiObjectEditingReward childObject = getObject(child.getIdentifier());
                 if(childObject == null) {
                     continue;
@@ -554,6 +559,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         }
     }
     
+    
     @Override
     public void drawBackground(int tint) {
         
@@ -570,7 +576,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         int wheel = Mouse.getDWheel();
         int offset = 0;
         if(x > this.left - 96 && x < this.left - 96 + 64) {
-            if(wheel!=0) {
+            if(wheel != 0) {
                 if(wheel > 0) {
                     if(yOff < 0) {
                         offset = 32;
@@ -582,7 +588,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                         yOff--;
                     }
                 }
-    
+                
                 for(GuiObjectEditingReward reward : unplacedRewards) {
                     if(!reward.isPlaced()) {
                         reward.setY(reward.getY() + offset);
@@ -594,7 +600,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         
         if(y >= top + 150 && y + 18 <= top + 150 + (6 * 18)) {
             if(x > this.left + guiWidth + 5 && x < this.left + guiWidth + 5 + 18 * 5) {
-                if(wheel!=0) {
+                if(wheel != 0) {
                     if(wheel > 0 && stackYOff < 0) {
                         offset = 18;
                         stackYOff++;
@@ -615,12 +621,34 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
     }
     
     @Override
+    public void handleKeyboardInput() throws IOException {
+        Keyboard.enableRepeatEvents(true);
+        super.handleKeyboardInput();
+    }
+    
+    @Override
     protected void keyTyped(char typedChar, int keyCode) throws IOException {
         super.keyTyped(typedChar, keyCode);
-        fieldName.textboxKeyTyped(typedChar, keyCode);
-        fieldDesc.textboxKeyTyped(typedChar, keyCode);
-        fieldCost.textboxKeyTyped(typedChar, keyCode);
-        fieldID.textboxKeyTyped(typedChar, keyCode);
+        if(typedChar == '\t') {
+            if(fieldID.isFocused()) {
+                fieldName.setFocused(true);
+                fieldID.setFocused(false);
+            } else if(fieldName.isFocused()) {
+                fieldDesc.setFocused(true);
+                fieldName.setFocused(false);
+            } else if(fieldDesc.isFocused()) {
+                fieldCost.setFocused(true);
+                fieldDesc.setFocused(false);
+            } else if(fieldCost.isFocused()) {
+                fieldID.setFocused(true);
+                fieldCost.setFocused(false);
+            }
+        } else {
+            fieldName.textboxKeyTyped(typedChar, keyCode);
+            fieldDesc.textboxKeyTyped(typedChar, keyCode);
+            fieldCost.textboxKeyTyped(typedChar, keyCode);
+            fieldID.textboxKeyTyped(typedChar, keyCode);
+        }
     }
     
     @Override
@@ -749,10 +777,9 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         if(fieldID.mouseClicked(mouseX, mouseY, mouseButton)) {
             successful = true;
         }
-        
         if(!successful) {
             editingReward = null;
-        }else{
+        } else {
             saveChanges = true;
         }
         
@@ -846,11 +873,17 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
             }
         }
         if(button.id == buttonUpdateReward.id) {
-            if(Prestige.REGISTRY.containsKey(id)) {
+            
+            if(Prestige.REGISTRY.containsKey(id) || editingReward != null) {
                 if(fieldCost.getText().isEmpty()) {
                     fieldCost.setText(0 + "");
                 }
-                Reward updated = Prestige.REGISTRY.get(id);
+                Reward updated;
+                if(editingReward != null) {
+                    updated = editingReward.getReward();
+                } else {
+                    updated = Prestige.REGISTRY.get(id);
+                }
                 updated.setTitle(fieldName.getText());
                 updated.setDescription(fieldDesc.getText());
                 updated.setCost(Integer.parseInt(fieldCost.getText()));
@@ -862,7 +895,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         }
         if(button.id == buttonReset.id) {
             Prestige.INSTANCE.loadRewards();
-//            generateRewards();
+            //            generateRewards();
         }
         
         
@@ -887,7 +920,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                 return itemStack;
             }
         }
-        return null;
+        return stackList.get(0);
     }
     
     public GuiObjectEditingReward getEditingReward() {
@@ -896,16 +929,12 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
     
     
     public void saveTempFile() {
-        //TODO look into the performance impact
-        System.out.println("saving");
         try {
             if(!FILE_TEMP.exists()) {
                 FILE_TEMP.getParentFile().mkdirs();
                 FILE_TEMP.createNewFile();
             }
             BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_TEMP));
-            
-            
             String json = Prestige.GSON.toJson(Prestige.REGISTRY.values().toArray());
             writer.write(json);
             writer.close();
@@ -913,4 +942,5 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
             Prestige.LOG.error("Unable to save Prestige backup JSON file!", e);
         }
     }
+    
 }

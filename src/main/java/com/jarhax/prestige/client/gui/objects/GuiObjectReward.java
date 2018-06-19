@@ -1,9 +1,12 @@
 package com.jarhax.prestige.client.gui.objects;
 
-import com.jarhax.prestige.api.Reward;
+import com.jarhax.prestige.Prestige;
+import com.jarhax.prestige.api.*;
 import com.jarhax.prestige.client.gui.GuiPrestigeBase;
 import com.jarhax.prestige.client.utils.RenderUtils;
+import com.jarhax.prestige.compat.crt.IReward;
 import net.minecraft.client.renderer.*;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
@@ -14,17 +17,20 @@ public class GuiObjectReward extends GuiObject {
     private static final ResourceLocation BACKGROUND = new ResourceLocation("prestige", "textures/gui/gui_prestige_icons.png");
     private final Reward reward;
     private boolean purchased;
+    private ItemStack renderStack;
     
     public GuiObjectReward(GuiPrestigeBase parent, int x, int y, int width, int height, Reward reward) {
         
         super(parent, x, y, width, height);
         this.reward = reward;
+        this.renderStack = reward.getIcon();
     }
     
     public GuiObjectReward(GuiPrestigeBase parent, Reward reward) {
         
         super(parent, reward.getX(), reward.getY(), 32, 32);
         this.reward = reward;
+        this.renderStack = reward.getIcon();
     }
     
     @Override
@@ -44,7 +50,7 @@ public class GuiObjectReward extends GuiObject {
         }
         GlStateManager.enableBlend();
         GlStateManager.blendFunc(770, 771);
-       
+        
         this.mc.getTextureManager().bindTexture(BACKGROUND);
         RenderUtils.drawTexturedModalRect(getX(), getY(), 0, 0, this.getWidth(), this.getHeight());
         if(isPurchased() || !parent.data.canPurchase(getReward())) {
@@ -61,7 +67,7 @@ public class GuiObjectReward extends GuiObject {
         GL11.glPushMatrix();
         RenderHelper.enableGUIStandardItemLighting();
         GL11.glTranslated(getX() + 8, getY() + 8, -50);
-        mc.getRenderItem().renderItemIntoGUI(reward.getIcon(), 0, 0);
+        mc.getRenderItem().renderItemIntoGUI(renderStack, 0, 0);
         GL11.glTranslated(-(getX() + 8), -(getY() + 8), 50);
         RenderHelper.disableStandardItemLighting();
         GL11.glPopMatrix();
@@ -96,7 +102,14 @@ public class GuiObjectReward extends GuiObject {
                 parent.data.unlockReward(getReward());
                 setPurchased(true);
                 parent.data.removePrestige(getReward().getCost());
-                
+                if(parent.getRewardsToGive() != null) {
+                    if(Prestige.REWARDS.containsKey(reward.getIdentifier())) {
+                        for(IReward rew : Prestige.REWARDS.get(reward.getIdentifier())) {
+                            parent.getRewardsToGive().add(rew);
+                        }
+                    }
+                    
+                }
             }
         }
     }

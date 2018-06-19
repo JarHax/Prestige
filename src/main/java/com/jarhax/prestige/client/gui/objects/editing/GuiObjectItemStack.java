@@ -1,12 +1,26 @@
 package com.jarhax.prestige.client.gui.objects.editing;
 
+import com.jarhax.prestige.Prestige;
 import com.jarhax.prestige.client.gui.*;
 import com.jarhax.prestige.client.gui.objects.GuiObject;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.block.model.*;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.*;
+import net.minecraftforge.client.model.pipeline.IVertexConsumer;
+import org.apache.commons.io.FileUtils;
 import org.lwjgl.opengl.GL11;
+import sun.nio.ch.IOUtil;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.util.*;
+import java.util.List;
 
 public class GuiObjectItemStack extends GuiObject {
     
@@ -75,15 +89,15 @@ public class GuiObjectItemStack extends GuiObject {
     
     @Override
     public void mouseClicked(int mouseX, int mouseY, int mouseButton) {
-        
+    
         super.mouseClicked(mouseX, mouseY, mouseButton);
-        if(collides(mouseX, mouseY)){
-            if(parent instanceof GuiPrestigeEditing){
-                ((GuiPrestigeEditing)parent).selectedStack = this;
+        if(collides(mouseX, mouseY)) {
+            if(parent instanceof GuiPrestigeEditing) {
+                ((GuiPrestigeEditing) parent).selectedStack = this;
+    
             }
         }
     }
-    
     @Override
     public void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
         

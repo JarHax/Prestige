@@ -49,14 +49,14 @@ public class Reward {
             throw new IllegalArgumentException("Prestige reward identifiers can not contain white space!");
         } else if(icon == null || icon.isEmpty()) {
             
-            throw new IllegalArgumentException("Prestige reward icon can not be a null or empty/aire item!");
+            throw new IllegalArgumentException("Prestige reward icon can not be a null or empty/air item!");
         }
         
         this.identifier = identifier.toLowerCase();
         this.title = title;
         this.description = description;
         //todo fix this
-        this.icon = icon.getItem().getRegistryName().toString();
+        setIcon(icon);
         this.x = x;
         this.y = y;
         this.cost = cost;
@@ -85,7 +85,7 @@ public class Reward {
         }
         catch (NBTException e) {
             
-            Prestige.LOG.error("The reward {} has an invalid icon value of {}.");
+            Prestige.LOG.error("The reward \"{}\" has an invalid icon value of \"{}\".", this.identifier, this.icon);
             return new ItemStack(Blocks.BARRIER);
         }
     }

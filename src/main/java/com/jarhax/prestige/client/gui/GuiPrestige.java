@@ -4,7 +4,9 @@ import com.jarhax.prestige.Prestige;
 import com.jarhax.prestige.api.Reward;
 import com.jarhax.prestige.client.gui.objects.*;
 import com.jarhax.prestige.client.utils.RenderUtils;
+import com.jarhax.prestige.compat.crt.IReward;
 import com.jarhax.prestige.data.*;
+import crafttweaker.api.minecraft.CraftTweakerMC;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
@@ -44,6 +46,15 @@ public class GuiPrestige extends GuiPrestigeBase {
     }
     
     @Override
+    public void onGuiClosed() {
+        super.onGuiClosed();
+        for(IReward reward : getRewardsToGive()) {
+            reward.process(CraftTweakerMC.getIWorld(player.world), CraftTweakerMC.getIPlayer(player));
+        }
+        
+    }
+    
+    @Override
     public void initGui() {
         
         this.guiWidth = 256;
@@ -58,6 +69,7 @@ public class GuiPrestige extends GuiPrestigeBase {
         this.border = new GuiObjectBorder(this, left, top, guiWidth, guiHeight);
         
         generateRewards();
+        rewardsToGive = new LinkedList<>();
     }
     
     @Override
@@ -149,7 +161,7 @@ public class GuiPrestige extends GuiPrestigeBase {
         GlStateManager.pushMatrix();
         GL11.glTranslated(0, 0, 500);
         this.border.draw(left, top, mouseX, mouseY, partialTicks);
-        fontRenderer.drawString("Prestige points: " + data.getPrestige(), left + 5, top +5, 0);
+        fontRenderer.drawString("Prestige points: " + data.getPrestige(), left + 5, top + 5, 0);
         GL11.glTranslated(0, 0, 0);
         GlStateManager.popMatrix();
         for(GuiObjectReward reward : guiObjects.values()) {

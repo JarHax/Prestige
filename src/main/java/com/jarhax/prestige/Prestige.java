@@ -1,8 +1,9 @@
 package com.jarhax.prestige;
 
 import com.google.gson.*;
-import com.jarhax.prestige.api.Reward;
+import com.jarhax.prestige.api.*;
 import com.jarhax.prestige.command.CommandPrestige;
+import com.jarhax.prestige.compat.crt.IReward;
 import com.jarhax.prestige.data.*;
 import com.jarhax.prestige.packet.*;
 import net.darkhax.bookshelf.BookshelfRegistry;
@@ -26,6 +27,8 @@ public class Prestige {
     public static final Logger LOG = LogManager.getLogger("Prestige");
     public static final NetworkHandler NETWORK = new NetworkHandler("prestige");
     public static final Map<String, Reward> REGISTRY = new HashMap<>();
+    
+    public static final HashMap<String, List<IReward>> REWARDS = new HashMap<>();
     
     @SideOnly(Side.CLIENT)
     public static PlayerData clientPlayerData;
@@ -53,20 +56,20 @@ public class Prestige {
     
     public void saveRewards() {
         
-            try {
-                if(!JSON_FILE.exists()) {
+        try {
+            if(!JSON_FILE.exists()) {
                 JSON_FILE.getParentFile().mkdirs();
                 JSON_FILE.createNewFile();
-                }
-                BufferedWriter writer = new BufferedWriter(new FileWriter(JSON_FILE));
-                
-    
-                String json = GSON.toJson(REGISTRY.values().toArray());
-                writer.write(json);
-                writer.close();
-            } catch(Exception e) {
-                LOG.error("Unable to save Prestige JSON file!", e);
             }
+            BufferedWriter writer = new BufferedWriter(new FileWriter(JSON_FILE));
+            
+            
+            String json = GSON.toJson(REGISTRY.values().toArray());
+            writer.write(json);
+            writer.close();
+        } catch(Exception e) {
+            LOG.error("Unable to save Prestige JSON file!", e);
+        }
         
     }
     

@@ -5,6 +5,7 @@ import com.jarhax.prestige.client.gui.GuiPrestigeBase;
 import com.jarhax.prestige.client.gui.objects.GuiObject;
 import com.jarhax.prestige.client.utils.RenderUtils;
 import net.minecraft.client.renderer.*;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
@@ -19,13 +20,14 @@ public class GuiObjectEditingReward extends GuiObject {
     
     private boolean moving;
     
+    private ItemStack renderStack;
     public GuiObjectEditingReward(GuiPrestigeBase parent, int x, int y, int width, int height, Reward reward) {
         
         super(parent, x, y, width, height);
         this.reward = reward;
         setX(x);
         setY(y);
-        
+        this.renderStack = reward.getIcon();
     }
     
     public GuiObjectEditingReward(GuiPrestigeBase parent, Reward reward) {
@@ -34,7 +36,7 @@ public class GuiObjectEditingReward extends GuiObject {
         this.reward = reward;
         setX(reward.getX());
         setY(reward.getY());
-        
+        this.renderStack = reward.getIcon();
     }
     
     public GuiObjectEditingReward(GuiPrestigeBase parent, int x, int y, Reward reward) {
@@ -43,6 +45,7 @@ public class GuiObjectEditingReward extends GuiObject {
         this.reward = reward;
         setX(x);
         setY(y);
+        this.renderStack = reward.getIcon();
         
     }
     
@@ -106,7 +109,7 @@ public class GuiObjectEditingReward extends GuiObject {
         GL11.glPushMatrix();
         RenderHelper.enableGUIStandardItemLighting();
         GL11.glTranslated(getX() + 8, getY() + 8, -50);
-        mc.getRenderItem().renderItemIntoGUI(reward.getIcon(), 0, 0);
+        mc.getRenderItem().renderItemIntoGUI(renderStack, 0, 0);
         GL11.glTranslated(-(getX() + 8), -(getY() + 8), 50);
         RenderHelper.disableStandardItemLighting();
         GL11.glPopMatrix();
