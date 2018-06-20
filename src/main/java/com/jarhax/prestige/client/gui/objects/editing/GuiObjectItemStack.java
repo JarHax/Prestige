@@ -1,25 +1,14 @@
 package com.jarhax.prestige.client.gui.objects.editing;
 
-import com.jarhax.prestige.Prestige;
 import com.jarhax.prestige.client.gui.*;
 import com.jarhax.prestige.client.gui.objects.GuiObject;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.block.model.*;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.*;
-import net.minecraftforge.client.model.pipeline.IVertexConsumer;
-import org.apache.commons.io.FileUtils;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.opengl.GL11;
-import sun.nio.ch.IOUtil;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.util.*;
 import java.util.List;
 
 public class GuiObjectItemStack extends GuiObject {
@@ -80,7 +69,11 @@ public class GuiObjectItemStack extends GuiObject {
         GlStateManager.translate(0, 0, 500);
         GlStateManager.disableAlpha();
         GlStateManager.enableLighting();
-        getParent().drawHoveringText(stack.getTooltip(parent.player, ITooltipFlag.TooltipFlags.NORMAL), mouseX, mouseY);
+        List<String> tooltip = stack.getTooltip(parent.player, ITooltipFlag.TooltipFlags.NORMAL);
+        
+        //TODO would be cool if this also highlighted case specific stuff
+        tooltip.set(0, tooltip.get(0).replaceAll(((GuiPrestigeEditing) parent).getFieldFilter().getText(), TextFormatting.YELLOW + ((GuiPrestigeEditing) parent).getFieldFilter().getText() + TextFormatting.RESET));
+        getParent().drawHoveringText(tooltip, mouseX, mouseY);
         GlStateManager.disableLighting();
         GlStateManager.enableAlpha();
         GL11.glPopMatrix();
@@ -89,15 +82,16 @@ public class GuiObjectItemStack extends GuiObject {
     
     @Override
     public void mouseClicked(int mouseX, int mouseY, int mouseButton) {
-    
+        
         super.mouseClicked(mouseX, mouseY, mouseButton);
         if(collides(mouseX, mouseY)) {
             if(parent instanceof GuiPrestigeEditing) {
                 ((GuiPrestigeEditing) parent).selectedStack = this;
-    
+                
             }
         }
     }
+    
     @Override
     public void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
         
