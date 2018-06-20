@@ -38,6 +38,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
     private GuiTextField fieldDesc;
     private GuiTextField fieldCost;
     private GuiTextField fieldID;
+    private GuiTextField fieldFilter;
     
     private GuiButtonTooltip buttonCreateNewReward;
     private GuiButtonTooltip buttonRemoveReward;
@@ -50,6 +51,8 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
     private final int east = 1;
     private final int south = 2;
     private final int west = 3;
+    
+    private int stackY = 162;
     
     public GuiObjectItemStack selectedStack;
     
@@ -71,7 +74,6 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                 rew = new GuiObjectEditingReward(this, this.left - 96 + (offX * 32), this.top + offY * 32, reward);
                 rew.setPlaced(false);
             }
-            System.out.println(rew.getReward().getIcon());
             this.unplacedRewards.add(rew);
             rew.setGridX(offX);
             rew.setGridY(offY);
@@ -82,6 +84,42 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
             }
             
         }
+    }
+    
+    public void generateStackList() {
+        stackList.clear();
+        stackYOff = 0;
+        int offX = 0;
+        int offY = 0;
+        NonNullList<ItemStack> stacks = NonNullList.create();
+        for(Item item : ForgeRegistries.ITEMS) {
+            item.getSubItems(CreativeTabs.SEARCH, stacks);
+        }
+        NonNullList<ItemStack> filtered = NonNullList.create();
+        if(fieldFilter.getText().length() > 0)
+            for(ItemStack stack : stacks) {
+                if(!stack.getDisplayName().toLowerCase().contains(fieldFilter.getText().toLowerCase())) {
+                    continue;
+                }
+                filtered.add(stack);
+            }
+        if(filtered.isEmpty()) {
+            filtered = stacks;
+        }
+        for(ItemStack stack : filtered) {
+            
+            GuiObjectItemStack st = new GuiObjectItemStack(this, this.left + guiWidth + 5 + (offX * 18), this.top + stackY + (offY * 18), stack);
+            stackList.add(st);
+            st.setGridX(offX);
+            st.setGridY(offY);
+            offX++;
+            if(offX == 5) {
+                offX = 0;
+                offY++;
+            }
+        }
+        if(stackList.size() > 0)
+            selectedStack = stackList.get(0);
     }
     
     @Override
@@ -97,38 +135,19 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         this.backGround = new GuiObjectBackGround(this, this.left, this.top, this.guiWidth, this.guiHeight);
         this.border = new GuiObjectBorder(this, left, top, guiWidth, guiHeight);
         
-        generateRewards();
-        
-        int offX = 0;
-        int offY = 0;
-        stackList = new LinkedList<>();
-        NonNullList<ItemStack> stacks = NonNullList.create();
-        for(Item item : ForgeRegistries.ITEMS) {
-            item.getSubItems(CreativeTabs.SEARCH, stacks);
-        }
-        for(ItemStack stack : stacks) {
-            GuiObjectItemStack st = new GuiObjectItemStack(this, this.left + guiWidth + 5 + (offX * 18), this.top + 150 + (offY * 18), stack);
-            stackList.add(st);
-            st.setGridX(offX);
-            st.setGridY(offY);
-            offX++;
-            if(offX == 5) {
-                offX = 0;
-                offY++;
-            }
-            selectedStack = stackList.get(0);
-        }
-        
-        int x = 20;
+        int yOffset = 35;
         int count = 0;
-        fieldID = new GuiTextField(0, fontRenderer, left + guiWidth + 5, top + x + (35 * count++), 100, 20);
+        fieldID = new GuiTextField(0, fontRenderer, left + guiWidth + 5, top + yOffset + (28 * count++), 100, fontRenderer.FONT_HEIGHT + 4);
         fieldID.setMaxStringLength(Integer.MAX_VALUE);
-        fieldName = new GuiTextField(0, fontRenderer, left + guiWidth + 5, top + x + (35 * count++), 100, 20);
+        fieldName = new GuiTextField(0, fontRenderer, left + guiWidth + 5, top + yOffset + (28 * count++), 100, fontRenderer.FONT_HEIGHT + 4);
         fieldName.setMaxStringLength(Integer.MAX_VALUE);
-        fieldDesc = new GuiTextField(0, fontRenderer, left + guiWidth + 5, top + x + (35 * count++), 100, 20);
+        fieldDesc = new GuiTextField(0, fontRenderer, left + guiWidth + 5, top + yOffset + (28 * count++), 100, fontRenderer.FONT_HEIGHT + 4);
         fieldDesc.setMaxStringLength(Integer.MAX_VALUE);
-        fieldCost = new GuiTextField(0, fontRenderer, left + guiWidth + 5, top + x + (35 * count++), 100, 20);
+        fieldCost = new GuiTextField(0, fontRenderer, left + guiWidth + 5, top + yOffset + (28 * count++), 100, fontRenderer.FONT_HEIGHT + 4);
         fieldCost.setMaxStringLength(Integer.MAX_VALUE);
+        
+        fieldFilter = new GuiTextField(0, fontRenderer, left + guiWidth + 5, top + yOffset + (28 * count++), 100, fontRenderer.FONT_HEIGHT + 4);
+        fieldFilter.setMaxStringLength(Integer.MAX_VALUE);
         
         fieldCost.setValidator(input -> {
             if(input == null || input.isEmpty()) {
@@ -146,13 +165,14 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         fieldDesc.setEnabled(true);
         fieldCost.setEnabled(true);
         fieldID.setEnabled(true);
+        fieldFilter.setEnabled(true);
         fieldCost.setText("0");
         count = 0;
-        buttonCreateNewReward = new GuiButtonTooltip(0, left + guiWidth + 5 + (20 * count++), top - 20, 20, 20, "+", this, "Add");
-        buttonRemoveReward = new GuiButtonTooltip(1, left + guiWidth + 5 + (20 * count++), top - 20, 20, 20, "-", this, "Remove");
-        buttonUpdateReward = new GuiButtonTooltip(2, left + guiWidth + 5 + (20 * count++), top - 20, 20, 20, "*", this, "Update");
-        buttonSave = new GuiButtonTooltip(3, left + guiWidth + 5 + (20 * count++), top - 20, 20, 20, "S", this, "Save");
-        buttonReset = new GuiButtonTooltip(4, left + guiWidth + 5 + (20 * count), top - 20, 20, 20, "R", this, "Reset");
+        buttonCreateNewReward = new GuiButtonTooltip(0, left + guiWidth + 5 + (20 * count++), top, 20, 20, "+", this, "Add");
+        buttonRemoveReward = new GuiButtonTooltip(1, left + guiWidth + 5 + (20 * count++), top, 20, 20, "-", this, "Remove");
+        buttonUpdateReward = new GuiButtonTooltip(2, left + guiWidth + 5 + (20 * count++), top, 20, 20, "*", this, "Update");
+        buttonSave = new GuiButtonTooltip(3, left + guiWidth + 5 + (20 * count++), top, 20, 20, "S", this, "Save");
+        buttonReset = new GuiButtonTooltip(4, left + guiWidth + 5 + (20 * count), top, 20, 20, "R", this, "Reset");
         
         this.addButton(buttonCreateNewReward);
         this.addButton(buttonRemoveReward);
@@ -160,6 +180,12 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         this.addButton(buttonSave);
         this.addButton(buttonReset);
         
+        
+        generateRewards();
+        
+        
+        stackList = new LinkedList<>();
+        generateStackList();
     }
     
     @Override
@@ -199,6 +225,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
             fieldDesc.updateCursorCounter();
             fieldCost.updateCursorCounter();
             fieldID.updateCursorCounter();
+            fieldFilter.updateCursorCounter();
             
         }
         
@@ -260,7 +287,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
             if(!stack.isVisible()) {
                 continue;
             }
-            if(stack.getY() >= top + 150 && stack.getY() + stack.getHeight() <= top + 150 + (5 * 18)) {
+            if(stack.getY() >= top + stackY && stack.getY() + stack.getHeight() <= top + stackY + (5 * 18)) {
                 if(selectedStack.equals(stack)) {
                     RenderUtils.drawLineUntextured(stack.getX(), stack.getY(), stack.getX2() - 2, stack.getY(), 0f, 0.8f, 0.8f, 2);
                     RenderUtils.drawLineUntextured(stack.getX(), stack.getY2() - 2, stack.getX2() - 2, stack.getY2() - 2, 0f, 0.8f, 0.8f, 2);
@@ -489,6 +516,10 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         fontRenderer.drawStringWithShadow("ID: ", fieldID.x, fieldID.y - 11, 0xFFFFFF);
         fieldID.drawTextBox();
         
+        fontRenderer.drawStringWithShadow("Filter: ", fieldFilter.x, fieldFilter.y - 11, 0xFFFFFF);
+        fieldFilter.drawTextBox();
+        
+        
         super.drawScreen(mouseX, mouseY, partialTicks);
         buttonCreateNewReward.drawText(mouseX, mouseY);
         buttonUpdateReward.drawText(mouseX, mouseY);
@@ -501,19 +532,19 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
             
             int butRight = this.left + guiWidth + 5 + 18 * 5 + 10;
             
-            RenderUtils.drawRect(butLeft, this.top + 150, butRight, this.top + 150 + 10, 0xFF111111);
-            RenderUtils.drawRect(butLeftInner, this.top + 150 + 2, butRight - 2, this.top + 150 + 8, 0xFF333333);
+            RenderUtils.drawRect(butLeft, this.top + stackY, butRight, this.top + stackY + 10, 0xFF111111);
+            RenderUtils.drawRect(butLeftInner, this.top + stackY + 2, butRight - 2, this.top + stackY + 8, 0xFF333333);
             
-            RenderUtils.drawRect(butLeft, this.top + 150 + (5 * 18) - 10, butRight, this.top + 150 + (5 * 18), 0xFF111111);
-            RenderUtils.drawRect(butLeftInner, this.top + 150 + (5 * 18) - 8, butRight - 2, this.top + 150 + (5 * 18) - 2, 0xFF333333);
+            RenderUtils.drawRect(butLeft, this.top + stackY + (5 * 18) - 10, butRight, this.top + stackY + (5 * 18), 0xFF111111);
+            RenderUtils.drawRect(butLeftInner, this.top + stackY + (5 * 18) - 8, butRight - 2, this.top + stackY + (5 * 18) - 2, 0xFF333333);
             
-            RenderUtils.drawLineUntextured(butLeft + 5, this.top + 152, butLeft + 2, this.top + 160 - 2, 0, 0.5f, 1, 4);
-            RenderUtils.drawLineUntextured(butLeft + 5, this.top + 152, butLeft + 8, this.top + 160 - 2, 0, 0.5f, 1, 4);
-            RenderUtils.drawLineUntextured(butLeft + 8, this.top + 158, butLeft + 2, this.top + 158, 0, 0.5f, 1, 4);
+            RenderUtils.drawLineUntextured(butLeft + 5, this.top + stackY + 2, butLeft + 2, this.top + stackY + 10 - 2, 0, 0.5f, 1, 4);
+            RenderUtils.drawLineUntextured(butLeft + 5, this.top + stackY + 2, butLeft + 8, this.top + stackY + 10 - 2, 0, 0.5f, 1, 4);
+            RenderUtils.drawLineUntextured(butLeft + 8, this.top + stackY + 8, butLeft + 2, this.top + stackY + 8, 0, 0.5f, 1, 4);
             
-            RenderUtils.drawLineUntextured(butLeft + 5, this.top + 150 + (5 * 18) - 2, butLeft + 2, this.top + 144 + (5 * 18) - 2, 0, 0.5f, 1, 4);
-            RenderUtils.drawLineUntextured(butLeft + 5, this.top + 150 + (5 * 18) - 2, butLeft + 8, this.top + 144 + (5 * 18) - 2, 0, 0.5f, 1, 4);
-            RenderUtils.drawLineUntextured(butLeft + 8, this.top + 144 + (5 * 18) - 2, butLeft + 2, this.top + 144 + (5 * 18) - 2, 0, 0.5f, 1, 4);
+            RenderUtils.drawLineUntextured(butLeft + 5, this.top + stackY + (5 * 18) - 2, butLeft + 2, this.top + stackY - 6 + (5 * 18) - 2, 0, 0.5f, 1, 4);
+            RenderUtils.drawLineUntextured(butLeft + 5, this.top + stackY + (5 * 18) - 2, butLeft + 8, this.top + stackY - 6 + (5 * 18) - 2, 0, 0.5f, 1, 4);
+            RenderUtils.drawLineUntextured(butLeft + 8, this.top + stackY - 6 + (5 * 18) - 2, butLeft + 2, this.top + stackY - 6 + (5 * 18) - 2, 0, 0.5f, 1, 4);
         }
         {
             
@@ -550,7 +581,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         for(GuiObjectItemStack stack : stackList) {
             if(stack.isVisible()) {
                 if(stack.collides(mouseX, mouseY)) {
-                    if(stack.getY() >= top + 150 && stack.getY() + stack.getHeight() <= top + 150 + (5 * 18)) {
+                    if(stack.getY() >= top + stackY && stack.getY() + stack.getHeight() <= top + stackY + (5 * 18)) {
                         stack.drawText(mouseX, mouseY);
                     }
                     
@@ -598,7 +629,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
             }
         }
         
-        if(y >= top + 150 && y + 18 <= top + 150 + (6 * 18)) {
+        if(y >= top + stackY && y + 18 <= top + stackY + (6 * 18)) {
             if(x > this.left + guiWidth + 5 && x < this.left + guiWidth + 5 + 18 * 5) {
                 if(wheel != 0) {
                     if(wheel > 0 && stackYOff < 0) {
@@ -640,14 +671,20 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                 fieldCost.setFocused(true);
                 fieldDesc.setFocused(false);
             } else if(fieldCost.isFocused()) {
-                fieldID.setFocused(true);
+                fieldFilter.setFocused(true);
                 fieldCost.setFocused(false);
+            } else if(fieldFilter.isFocused()) {
+                fieldID.setFocused(true);
+                fieldFilter.setFocused(false);
             }
         } else {
             fieldName.textboxKeyTyped(typedChar, keyCode);
             fieldDesc.textboxKeyTyped(typedChar, keyCode);
             fieldCost.textboxKeyTyped(typedChar, keyCode);
             fieldID.textboxKeyTyped(typedChar, keyCode);
+            if(fieldFilter.textboxKeyTyped(typedChar, keyCode)) {
+                generateStackList();
+            }
         }
     }
     
@@ -659,14 +696,11 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         this.prevMY = mouseY;
         
         if(mouseButton == 0) {
-            
-            RenderUtils.drawRect(this.left + guiWidth + 5 + 18 * 5, this.top + 150 + (5 * 18) - 10, this.left + guiWidth + 5 + 18 * 5 + 10, this.top + 150 + (5 * 18), 0xFF111111);
-            RenderUtils.drawRect(this.left + guiWidth + 5 + 18 * 5 + 2, this.top + 150 + (5 * 18) - 8, this.left + guiWidth + 5 + 18 * 5 + 10 - 2, this.top + 150 + (5 * 18) - 2, 0xFF333333);
             boolean clicked = false;
             int offset = 0;
             if(mouseX > this.left + guiWidth + 5 + 18 * 5 && mouseX < this.left + guiWidth + 5 + 18 * 5 + 10) {
                 
-                if(mouseY > this.top + 150 + (5 * 18) - 10 && mouseY < this.top + 150 + (5 * 18)) {
+                if(mouseY > this.top + stackY + (5 * 18) - 10 && mouseY < this.top + stackY + (5 * 18)) {
                     if(Math.abs(stackYOff) < (stackList.size() - 25) / 5) {
                         stackYOff--;
                         offset = -18;
@@ -674,7 +708,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                     }
                 }
                 
-                if(mouseY > this.top + 150 && mouseY < this.top + 150 + 10) {
+                if(mouseY > this.top + stackY && mouseY < this.top + stackY + 10) {
                     if(stackYOff < 0) {
                         stackYOff++;
                         offset = 18;
@@ -699,7 +733,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                     }
                 }
                 if(mouseY < this.top + guiHeight && mouseY > this.top + guiHeight - 10) {
-                    if(yOff < -1) {
+                    if(yOff <= -1) {
                         yOff++;
                         offset = 32;
                         clicked = true;
@@ -721,7 +755,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                 }
             }
             
-            stackList.stream().filter(stack -> stack.getY() >= top + 150 && stack.getY() + stack.getHeight() <= top + 150 + (5 * 18)).forEach(stack -> stack.mouseClicked(mouseX, mouseY, mouseButton));
+            stackList.stream().filter(stack -> stack.getY() >= top + stackY && stack.getY() + stack.getHeight() <= top + stackY + (5 * 18)).forEach(stack -> stack.mouseClicked(mouseX, mouseY, mouseButton));
             saveChanges = true;
         }
         
@@ -775,6 +809,9 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
             successful = true;
         }
         if(fieldID.mouseClicked(mouseX, mouseY, mouseButton)) {
+            successful = true;
+        }
+        if(fieldFilter.mouseClicked(mouseX, mouseY, mouseButton)) {
             successful = true;
         }
         if(!successful) {
@@ -943,4 +980,8 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         }
     }
     
+    
+    public GuiTextField getFieldFilter() {
+        return fieldFilter;
+    }
 }
