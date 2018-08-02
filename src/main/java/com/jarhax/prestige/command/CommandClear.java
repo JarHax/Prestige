@@ -37,9 +37,7 @@ public class CommandClear extends Command {
         if(player != null) {
             
             final PlayerData data = GlobalPrestigeData.getPlayerData(player);
-            for(Reward unlockedReward : data.getUnlockedRewards()) {
-                data.removeReward(unlockedReward);
-            }
+            data.getUnlockedRewards().clear();
             GlobalPrestigeData.save(player);
             sender.sendMessage(new TextComponentTranslation("chat.prestige.clear.sender", player.getName()));
         }
