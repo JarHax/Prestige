@@ -106,7 +106,6 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                 
                 if(filter.startsWith("@(") && filter.endsWith(")") && !filter.equalsIgnoreCase("@()")) {
                     String[] mods = filter.split("@\\(")[1].split("\\)")[0].split(";");
-                    System.out.println(mods);
                     boolean valid = false;
                     for(String s : mods) {
                         s = s.trim();
