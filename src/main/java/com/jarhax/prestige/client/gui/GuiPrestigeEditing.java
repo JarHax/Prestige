@@ -96,12 +96,36 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
             item.getSubItems(CreativeTabs.SEARCH, stacks);
         }
         NonNullList<ItemStack> filtered = NonNullList.create();
-        if(fieldFilter.getText().length() > 0)
+        String filter = fieldFilter.getText().toLowerCase();
+        if(filter.length() > 0)
             for(ItemStack stack : stacks) {
-                if(!stack.getDisplayName().toLowerCase().contains(fieldFilter.getText().toLowerCase())) {
+                if(stack == null || stack.getDisplayName() == null) {
+                    Prestige.LOG.error("INVALID ITEMSTACK!! " + stack);
                     continue;
                 }
-                filtered.add(stack);
+                
+                if(filter.startsWith("@(") && filter.endsWith(")") && !filter.equalsIgnoreCase("@()")) {
+                    String[] mods = filter.split("@\\(")[1].split("\\)")[0].split(";");
+                    System.out.println(mods);
+                    boolean valid = false;
+                    for(String s : mods) {
+                        s = s.trim();
+                        if(stack.getItem().getRegistryName().getResourceDomain().toLowerCase().startsWith(s.toLowerCase())) {
+                            valid = true;
+                        }
+                    }
+                    
+                    if(valid) {
+                        filtered.add(stack);
+                    } else {
+                        continue;
+                    }
+                } else {
+                    if(!stack.getDisplayName().toLowerCase().contains(filter)) {
+                        continue;
+                    }
+                    filtered.add(stack);
+                }
             }
         if(filtered.isEmpty()) {
             filtered = stacks;
@@ -173,7 +197,6 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         buttonUpdateReward = new GuiButtonTooltip(2, left + guiWidth + 5 + (20 * count++), top, 20, 20, "*", this, "Update");
         buttonSave = new GuiButtonTooltip(3, left + guiWidth + 5 + (20 * count++), top, 20, 20, "S", this, "Save");
         buttonReset = new GuiButtonTooltip(4, left + guiWidth + 5 + (20 * count), top, 20, 20, "R", this, "Reset");
-        
         this.addButton(buttonCreateNewReward);
         this.addButton(buttonRemoveReward);
         this.addButton(buttonUpdateReward);
@@ -766,23 +789,26 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                     continue;
                 }
                 if(mouseButton == 0) {
-                    if(editingReward != null && !backGround.collides(mouseX, mouseY, mouseX, mouseY)) {
-                        selectedReward = reward;
-                        selectedReward.setPlaced(false);
-                        successful = true;
-                    }
-                    if(editingReward == null) {
-                        selectedReward = reward;
-                        selectedReward.setPlaced(false);
-                        successful = true;
-                    } else if(backGround.collides(mouseX, mouseY, mouseX, mouseY) && !reward.equals(editingReward)) {
-                        Set<Reward> children = editingReward.getReward().getChildren();
-                        if(children.contains(reward.getReward())) {
-                            editingReward.getReward().removeChild(reward.getReward());
-                        } else {
-                            editingReward.getReward().addChild(reward.getReward());
+                    if(!reward.isLocked()) {
+                        if(editingReward != null && !backGround.collides(mouseX, mouseY, mouseX, mouseY)) {
+                            selectedReward = reward;
+                            selectedReward.setPlaced(false);
+                            successful = true;
+                            
                         }
-                        successful = true;
+                        if(editingReward == null) {
+                            selectedReward = reward;
+                            selectedReward.setPlaced(false);
+                            successful = true;
+                        } else if(backGround.collides(mouseX, mouseY, mouseX, mouseY) && !reward.equals(editingReward)) {
+                            Set<Reward> children = editingReward.getReward().getChildren();
+                            if(children.contains(reward.getReward())) {
+                                editingReward.getReward().removeChild(reward.getReward());
+                            } else {
+                                editingReward.getReward().addChild(reward.getReward());
+                            }
+                            successful = true;
+                        }
                     }
                 } else if(mouseButton == 1 && selectedReward == null && reward.isPlaced()) {
                     if(reward.equals(editingReward)) {
@@ -894,8 +920,13 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                     fieldCost.setText(0 + "");
                 }
                 Prestige.REGISTRY.put(id, new Reward(id, fieldName.getText(), 0, 0, Integer.parseInt(fieldCost.getText()), selectedStack.getStack(), fieldDesc.getText()));
+                fieldName.setText("");
+                fieldDesc.setText("");
+                fieldID.setText("");
+                fieldCost.setText("0");
             }
         }
+        
         if(button.id == buttonRemoveReward.id) {
             if(Prestige.REGISTRY.containsKey(id)) {
                 Reward removed = Prestige.REGISTRY.get(id);
@@ -934,7 +965,6 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
             Prestige.INSTANCE.loadRewards();
             //            generateRewards();
         }
-        
         
         yOff = 0;
         generateRewards();

@@ -102,14 +102,14 @@ public class GuiObjectReward extends GuiObject {
                 parent.data.unlockReward(getReward());
                 setPurchased(true);
                 parent.data.removePrestige(getReward().getCost());
-                if(parent.getRewardsToGive() != null) {
-                    if(Prestige.REWARDS.containsKey(reward.getIdentifier())) {
-                        for(IReward rew : Prestige.REWARDS.get(reward.getIdentifier())) {
-                            parent.getRewardsToGive().add(rew);
-                        }
-                    }
-                    
-                }
+//                if(parent.getRewardsToGive() != null) {
+//                    if(Prestige.REWARDS.containsKey(reward.getIdentifier())) {
+//                        for(IReward rew : Prestige.REWARDS.get(reward.getIdentifier())) {
+                            parent.getRewardsToGive().add(this);
+//                        }
+//                    }
+//
+//                }
             }
         }
     }

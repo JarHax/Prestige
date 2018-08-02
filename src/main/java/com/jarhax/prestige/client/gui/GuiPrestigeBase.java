@@ -24,7 +24,7 @@ public class GuiPrestigeBase extends GuiScreen {
     public EntityPlayer player;
     public PlayerData data;
     
-    protected LinkedList<IReward> rewardsToGive;
+    protected LinkedList<GuiObjectReward> rewardsToGive;
     
     public Map<String, GuiObjectReward> getGuiObjects() {
         return guiObjects;
@@ -61,11 +61,11 @@ public class GuiPrestigeBase extends GuiScreen {
         return this.guiHeight;
     }
     
-    public LinkedList<IReward> getRewardsToGive() {
+    public LinkedList<GuiObjectReward> getRewardsToGive() {
         return rewardsToGive;
     }
     
-    public void setRewardsToGive(LinkedList<IReward> rewardsToGive) {
+    public void setRewardsToGive(LinkedList<GuiObjectReward> rewardsToGive) {
         this.rewardsToGive = rewardsToGive;
     }
     

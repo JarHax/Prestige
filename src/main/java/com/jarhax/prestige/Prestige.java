@@ -45,6 +45,8 @@ public class Prestige {
         NETWORK.register(PacketOpenPrestigeGUI.class, Side.CLIENT);
         NETWORK.register(PacketEditPrestigeGUI.class, Side.CLIENT);
         NETWORK.register(PacketAttemptPurchase.class, Side.SERVER);
+        NETWORK.register(PacketGiveRewards.class, Side.SERVER);
+    
         BookshelfRegistry.addCommand(new CommandPrestige());
         JSON_FILE = new File(new File(event.getModConfigurationDirectory(), "prestige"), "rewards.json");
     }

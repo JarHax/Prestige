@@ -21,6 +21,9 @@ public class GuiObjectEditingReward extends GuiObject {
     private boolean moving;
     
     private ItemStack renderStack;
+    
+    private boolean locked = false;
+    
     public GuiObjectEditingReward(GuiPrestigeBase parent, int x, int y, int width, int height, Reward reward) {
         
         super(parent, x, y, width, height);
@@ -28,6 +31,7 @@ public class GuiObjectEditingReward extends GuiObject {
         setX(x);
         setY(y);
         this.renderStack = reward.getIcon();
+        locked = false;
     }
     
     public GuiObjectEditingReward(GuiPrestigeBase parent, Reward reward) {
@@ -37,6 +41,7 @@ public class GuiObjectEditingReward extends GuiObject {
         setX(reward.getX());
         setY(reward.getY());
         this.renderStack = reward.getIcon();
+        locked = false;
     }
     
     public GuiObjectEditingReward(GuiPrestigeBase parent, int x, int y, Reward reward) {
@@ -46,6 +51,7 @@ public class GuiObjectEditingReward extends GuiObject {
         setX(x);
         setY(y);
         this.renderStack = reward.getIcon();
+        locked = false;
         
     }
     
@@ -59,7 +65,7 @@ public class GuiObjectEditingReward extends GuiObject {
     public void draw(int left, int top, int mouseX, int mouseY, float partialTicks) {
         
         this.mc.getTextureManager().bindTexture(BACKGROUND);
-    
+        
         GlStateManager.enableBlend();
         GlStateManager.blendFunc(770, 771);
         if(!isPlaced()) {
@@ -126,7 +132,7 @@ public class GuiObjectEditingReward extends GuiObject {
         text.add("");
         text.add("- " + reward.getDescription());
         text.add("- costs: " + reward.getCost());
-    
+        
         getParent().drawHoveringText(text, mouseX, mouseY);
         GlStateManager.disableLighting();
         GlStateManager.enableAlpha();
@@ -216,5 +222,13 @@ public class GuiObjectEditingReward extends GuiObject {
     @Override
     public float getY() {
         return reward.getY();
+    }
+    
+    public void setLocked(boolean locked) {
+        this.locked = locked;
+    }
+    
+    public boolean isLocked() {
+        return locked;
     }
 }

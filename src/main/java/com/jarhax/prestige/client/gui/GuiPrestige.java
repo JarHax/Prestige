@@ -4,9 +4,8 @@ import com.jarhax.prestige.Prestige;
 import com.jarhax.prestige.api.Reward;
 import com.jarhax.prestige.client.gui.objects.*;
 import com.jarhax.prestige.client.utils.RenderUtils;
-import com.jarhax.prestige.compat.crt.IReward;
 import com.jarhax.prestige.data.*;
-import crafttweaker.api.minecraft.CraftTweakerMC;
+import com.jarhax.prestige.packet.PacketGiveRewards;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
@@ -48,9 +47,11 @@ public class GuiPrestige extends GuiPrestigeBase {
     @Override
     public void onGuiClosed() {
         super.onGuiClosed();
-        for(IReward reward : getRewardsToGive()) {
-            reward.process(CraftTweakerMC.getIWorld(player.world), CraftTweakerMC.getIPlayer(player));
+        String[] rewards = new String[getRewardsToGive().size()];
+        for(int i = 0; i < rewards.length; i++) {
+            rewards[i] = getRewardsToGive().get(i).getReward().getIdentifier();
         }
+        Prestige.NETWORK.sendToServer(new PacketGiveRewards(rewards));
         
     }
     
