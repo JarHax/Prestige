@@ -8,3 +8,4 @@ chat.prestige.added.reciever=You gained %d prestige points!
 chat.prestige.synced=Your prestige data has been synced!
 chat.prestige.open.reciever=Prestige GUI forcefully displayed by %s.
 chat.prestige.open.sender=%s's prestige GUI has been opened.
+chat.prestige.clear.sender=Cleared rewards for: %s
