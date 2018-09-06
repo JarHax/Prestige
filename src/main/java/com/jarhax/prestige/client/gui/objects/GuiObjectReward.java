@@ -82,7 +82,9 @@ public class GuiObjectReward extends GuiObject {
         List<String> text = new LinkedList<>();
         text.add(reward.getTitle());
         text.add("");
-        text.add("- " + reward.getDescription());
+        for(String s : reward.getDescription().split("\\\\n")) {
+            text.add("- " + s.replaceAll("\\\\t", "    "));
+        }
         text.add("- costs: " + reward.getCost());
         
         getParent().drawHoveringText(text, mouseX, mouseY);
