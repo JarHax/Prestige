@@ -5,10 +5,12 @@ import com.jarhax.prestige.api.*;
 import com.jarhax.prestige.command.CommandPrestige;
 import com.jarhax.prestige.compat.crt.IReward;
 import com.jarhax.prestige.data.*;
+import com.jarhax.prestige.events.CommonEventHandler;
 import com.jarhax.prestige.packet.*;
 import net.darkhax.bookshelf.BookshelfRegistry;
 import net.darkhax.bookshelf.network.NetworkHandler;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.*;
 import net.minecraftforge.fml.common.event.*;
@@ -49,6 +51,7 @@ public class Prestige {
     
         BookshelfRegistry.addCommand(new CommandPrestige());
         JSON_FILE = new File(new File(event.getModConfigurationDirectory(), "prestige"), "rewards.json");
+        MinecraftForge.EVENT_BUS.register(new CommonEventHandler());
     }
     
     @EventHandler
