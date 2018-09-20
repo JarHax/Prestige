@@ -1,6 +1,5 @@
 package com.jarhax.prestige.events;
 
-import com.blamejared.ctgui.reference.Reference;
 import com.jarhax.prestige.Prestige;
 import com.jarhax.prestige.api.Reward;
 import com.jarhax.prestige.compat.crt.IReward;
@@ -14,8 +13,6 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import java.util.*;
 
 public class CommonEventHandler {
-    
-    public static final String NBT_NAME = Reference.MOD_ID + "_given_rewards";
     
     @SubscribeEvent
     public void playerLogin(PlayerEvent.PlayerLoggedInEvent event) {
