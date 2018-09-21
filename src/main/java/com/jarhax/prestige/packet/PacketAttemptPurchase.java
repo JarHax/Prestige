@@ -6,6 +6,7 @@ import com.jarhax.prestige.data.GlobalPrestigeData;
 import com.jarhax.prestige.data.PlayerData;
 
 import net.darkhax.bookshelf.network.SerializableMessage;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
@@ -26,15 +27,15 @@ public class PacketAttemptPurchase extends SerializableMessage {
     @Override
     public IMessage handleMessage (MessageContext context) {
 
-        final PlayerData data = GlobalPrestigeData.getPlayerData(context.getServerHandler().player);
+        final EntityPlayer player = context.getServerHandler().player;
+        final PlayerData data = GlobalPrestigeData.getPlayerData(player);
         final Reward reward = Prestige.REGISTRY.get(this.rewardKey);
 
         if (data.canPurchase(reward)) {
 
             data.removePrestige(reward.getCost());
             data.unlockReward(reward);
-            GlobalPrestigeData.save(data);
-            return new PacketSyncPrestige(data);
+            GlobalPrestigeData.save(player);
         }
 
         return null;

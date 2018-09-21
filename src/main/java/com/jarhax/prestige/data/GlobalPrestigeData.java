@@ -7,8 +7,10 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.jarhax.prestige.Prestige;
+import com.jarhax.prestige.packet.PacketSyncPrestige;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.CompressedStreamTools;
 
 public class GlobalPrestigeData {
@@ -39,10 +41,16 @@ public class GlobalPrestigeData {
 
     public static void save (EntityPlayer player) {
 
-        save(getPlayerData(player));
+        final PlayerData data = getPlayerData(player);
+        save(data);
+        
+        if (player instanceof EntityPlayerMP) {
+            
+            Prestige.NETWORK.sendTo(new PacketSyncPrestige(data), (EntityPlayerMP) player);
+        }
     }
 
-    public static void save (PlayerData data) {
+    private static void save (PlayerData data) {
 
         try {
 
