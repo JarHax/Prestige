@@ -35,8 +35,7 @@ public class GuiPrestige extends GuiPrestigeBase {
             GuiObjectReward rew;
             if(reward.isPlaced()) {
                 rew = new GuiObjectReward(this, reward);
-                PlayerData data = GlobalPrestigeData.getPlayerData(player);
-                if(data.hasReward(reward)) {
+                if(Prestige.clientPlayerData.hasReward(reward)) {
                     rew.setPurchased(true);
                 }
                 this.guiObjects.put(rew.getReward().getIdentifier(), rew);
@@ -64,7 +63,6 @@ public class GuiPrestige extends GuiPrestigeBase {
         this.left = this.width / 2 - this.guiWidth / 2;
         this.top = this.height / 2 - this.guiHeight / 2;
         player = mc.player;
-        data = GlobalPrestigeData.getPlayerData(player);
         this.guiObjects = new LinkedHashMap<>();
         this.backGround = new GuiObjectBackGround(this, this.left, this.top, this.guiWidth, this.guiHeight);
         this.border = new GuiObjectBorder(this, left, top, guiWidth, guiHeight);
@@ -162,7 +160,7 @@ public class GuiPrestige extends GuiPrestigeBase {
         GlStateManager.pushMatrix();
         GL11.glTranslated(0, 0, 500);
         this.border.draw(left, top, mouseX, mouseY, partialTicks);
-        fontRenderer.drawString("Prestige points: " + data.getPrestige(), left + 5, top + 5, 0);
+        fontRenderer.drawString("Prestige points: " + Prestige.clientPlayerData.getPrestige(), left + 5, top + 5, 0);
         GL11.glTranslated(0, 0, 0);
         GlStateManager.popMatrix();
         for(GuiObjectReward reward : guiObjects.values()) {

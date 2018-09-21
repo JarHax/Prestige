@@ -45,7 +45,7 @@ public class GuiObjectReward extends GuiObject {
         this.mc.getTextureManager().bindTexture(BACKGROUND);
         if(isPurchased()) {
             GlStateManager.color(0, 0.8f, 0.8f);
-        } else if(!parent.data.canPurchase(getReward())) {
+        } else if(!Prestige.clientPlayerData.canPurchase(getReward())) {
             GlStateManager.color(0.8f, 0f, 0f);
         }
         GlStateManager.enableBlend();
@@ -53,7 +53,7 @@ public class GuiObjectReward extends GuiObject {
         
         this.mc.getTextureManager().bindTexture(BACKGROUND);
         RenderUtils.drawTexturedModalRect(getX(), getY(), 0, 0, this.getWidth(), this.getHeight());
-        if(isPurchased() || !parent.data.canPurchase(getReward())) {
+        if(isPurchased() || !Prestige.clientPlayerData.canPurchase(getReward())) {
             GlStateManager.color(1, 1f, 1f);
         }
         renderIcon();
@@ -99,11 +99,11 @@ public class GuiObjectReward extends GuiObject {
         
         super.mouseClicked(mouseX, mouseY, mouseButton);
         if(collides(mouseX, mouseY, mouseX, mouseY)) {
-            if(parent.data.canPurchase(getReward())) {
+            if(Prestige.clientPlayerData.canPurchase(getReward())) {
                 //TODO send network packet updating the server
-                parent.data.unlockReward(getReward());
+                Prestige.clientPlayerData.unlockReward(getReward());
                 setPurchased(true);
-                parent.data.removePrestige(getReward().getCost());
+                Prestige.clientPlayerData.removePrestige(getReward().getCost());
 //                if(parent.getRewardsToGive() != null) {
 //                    if(Prestige.REWARDS.containsKey(reward.getIdentifier())) {
 //                        for(IReward rew : Prestige.REWARDS.get(reward.getIdentifier())) {

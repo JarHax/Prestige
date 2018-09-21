@@ -22,7 +22,6 @@ public class GuiPrestigeBase extends GuiScreen {
     protected int prevMY;
     
     public EntityPlayer player;
-    public PlayerData data;
     
     protected LinkedList<GuiObjectReward> rewardsToGive;
     
