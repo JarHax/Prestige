@@ -72,7 +72,7 @@ public class GuiObjectItemStack extends GuiObject {
         List<String> tooltip = stack.getTooltip(parent.player, ITooltipFlag.TooltipFlags.NORMAL);
         
         //TODO would be cool if this also highlighted case specific stuff
-        tooltip.set(0, tooltip.get(0).replaceAll(((GuiPrestigeEditing) parent).getFieldFilter().getText(), TextFormatting.YELLOW + ((GuiPrestigeEditing) parent).getFieldFilter().getText() + TextFormatting.RESET));
+        tooltip.set(0, tooltip.get(0));
         getParent().drawHoveringText(tooltip, mouseX, mouseY);
         GlStateManager.disableLighting();
         GlStateManager.enableAlpha();
