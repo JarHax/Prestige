@@ -55,7 +55,6 @@ public class Reward {
         this.identifier = identifier.toLowerCase();
         this.title = title;
         this.description = description;
-        //todo fix this
         setIcon(icon);
         this.x = x;
         this.y = y;

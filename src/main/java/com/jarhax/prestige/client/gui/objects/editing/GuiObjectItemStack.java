@@ -71,8 +71,6 @@ public class GuiObjectItemStack extends GuiObject {
         GlStateManager.enableLighting();
         List<String> tooltip = stack.getTooltip(parent.player, ITooltipFlag.TooltipFlags.NORMAL);
         
-        //TODO would be cool if this also highlighted case specific stuff
-        tooltip.set(0, tooltip.get(0));
         getParent().drawHoveringText(tooltip, mouseX, mouseY);
         GlStateManager.disableLighting();
         GlStateManager.enableAlpha();

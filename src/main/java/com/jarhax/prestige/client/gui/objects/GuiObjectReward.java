@@ -1,10 +1,10 @@
 package com.jarhax.prestige.client.gui.objects;
 
 import com.jarhax.prestige.Prestige;
-import com.jarhax.prestige.api.*;
+import com.jarhax.prestige.api.Reward;
 import com.jarhax.prestige.client.gui.GuiPrestigeBase;
 import com.jarhax.prestige.client.utils.RenderUtils;
-import com.jarhax.prestige.compat.crt.IReward;
+import com.jarhax.prestige.packet.PacketAttemptPurchase;
 import net.minecraft.client.renderer.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -100,18 +100,9 @@ public class GuiObjectReward extends GuiObject {
         super.mouseClicked(mouseX, mouseY, mouseButton);
         if(collides(mouseX, mouseY, mouseX, mouseY)) {
             if(Prestige.clientPlayerData.canPurchase(getReward())) {
-                //TODO send network packet updating the server
-                Prestige.clientPlayerData.unlockReward(getReward());
                 setPurchased(true);
-                Prestige.clientPlayerData.removePrestige(getReward().getCost());
-//                if(parent.getRewardsToGive() != null) {
-//                    if(Prestige.REWARDS.containsKey(reward.getIdentifier())) {
-//                        for(IReward rew : Prestige.REWARDS.get(reward.getIdentifier())) {
-                            parent.getRewardsToGive().add(this);
-//                        }
-//                    }
-//
-//                }
+                parent.getRewardsToGive().add(this);
+                Prestige.NETWORK.sendToServer(new PacketAttemptPurchase(getReward()));
             }
         }
     }

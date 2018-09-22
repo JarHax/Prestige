@@ -36,6 +36,10 @@ public class PacketGiveRewards extends SerializableMessage {
         }
         for(String s : rewards) {
             final Reward reward = Prestige.REGISTRY.get(s);
+            if(reward == null) {
+                Prestige.LOG.error(s + " is not a registered reward!");
+                continue;
+            }
             data.setBoolean(reward.getIdentifier(), true);
             List<IReward> list = Prestige.REWARDS.getOrDefault(reward.getIdentifier(), new ArrayList<>());
             for(IReward iReward : list) {

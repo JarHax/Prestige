@@ -63,8 +63,8 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         unplacedRewards.clear();
         int offX = 0;
         int offY = 0;
-        Collection<Reward> values = new LinkedList<>(Prestige.REGISTRY.values());
-        ((LinkedList<Reward>) values).sort(Comparator.comparing(Reward::getIdentifier));
+        LinkedList<Reward> values = new LinkedList<>(Prestige.REGISTRY.values());
+        values.sort(Comparator.comparing(Reward::getIdentifier));
         for(Reward reward : values) {
             GuiObjectEditingReward rew;
             if(reward.isPlaced()) {
@@ -99,7 +99,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         String filter = fieldFilter.getText().toLowerCase();
         if(filter.length() > 0)
             for(ItemStack stack : stacks) {
-                if(stack == null || stack.getDisplayName() == null) {
+                if(stack == null) {
                     Prestige.LOG.error("INVALID ITEMSTACK!! " + stack);
                     continue;
                 }
@@ -116,8 +116,6 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                     
                     if(valid) {
                         filtered.add(stack);
-                    } else {
-                        continue;
                     }
                 } else {
                     if(!stack.getDisplayName().toLowerCase().contains(filter)) {

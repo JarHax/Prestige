@@ -29,8 +29,8 @@ public class GuiPrestige extends GuiPrestigeBase {
     
     public void generateRewards() {
         guiObjects.clear();
-        Collection<Reward> values = new LinkedList<>(Prestige.REGISTRY.values());
-        ((LinkedList<Reward>) values).sort(Comparator.comparing(Reward::getIdentifier));
+        LinkedList<Reward> values = new LinkedList<>(Prestige.REGISTRY.values());
+        values.sort(Comparator.comparing(Reward::getIdentifier));
         for(Reward reward : values) {
             GuiObjectReward rew;
             if(reward.isPlaced()) {
