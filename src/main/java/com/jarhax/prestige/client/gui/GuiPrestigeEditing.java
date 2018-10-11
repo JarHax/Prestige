@@ -118,7 +118,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                         filtered.add(stack);
                     }
                 } else {
-                    if(!stack.getDisplayName().toLowerCase().contains(filter)) {
+                    if(stack.getDisplayName() == null || stack.getDisplayName().isEmpty() || !stack.getDisplayName().toLowerCase().contains(filter)) {
                         continue;
                     }
                     filtered.add(stack);

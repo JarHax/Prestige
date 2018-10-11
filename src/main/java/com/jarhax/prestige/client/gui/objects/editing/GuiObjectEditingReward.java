@@ -103,10 +103,11 @@ public class GuiObjectEditingReward extends GuiObject {
                     renderIcon();
                 }
             }
-            
-            if(collides(mouseX, mouseY, mouseX, mouseY)) {
-                drawText(mouseX, mouseY);
-            }
+    
+            if(!isPlaced())
+                if(collides(mouseX, mouseY, mouseX, mouseY)) {
+                    drawText(mouseX, mouseY);
+                }
         }
     }
     
