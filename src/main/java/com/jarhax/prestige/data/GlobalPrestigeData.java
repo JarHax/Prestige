@@ -26,9 +26,14 @@ public class GlobalPrestigeData {
         }
     }
 
+    public static PlayerData getPlayerData (UUID id) {
+        
+        return CACHE.computeIfAbsent(id, PlayerData::new);
+    }
+    
     public static PlayerData getPlayerData (EntityPlayer player) {
 
-        return CACHE.computeIfAbsent(player.getPersistentID(), PlayerData::new);
+        return getPlayerData(player.getUniqueID());
     }
 
     public static void saveAll () {
@@ -50,12 +55,13 @@ public class GlobalPrestigeData {
         }
     }
 
-    private static void save (PlayerData data) {
+    public static void save (PlayerData data) {
 
         try {
 
             CompressedStreamTools.write(data.save(), new File(SAVE_DIR, data.getFileName()));
             Prestige.LOG.info("Saving data for {}.", data.getPlayerId().toString());
+            CACHE.put(data.getPlayerId(), data);
         }
 
         catch (final IOException e) {
