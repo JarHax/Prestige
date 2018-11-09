@@ -22,7 +22,21 @@ public class GuiObjectBorder extends GuiObject {
         if(this.visible) {
             GlStateManager.pushMatrix();
             this.mc.getTextureManager().bindTexture(BACKGROUND_BORDER);
-            RenderUtils.drawTexturedModalRect(this.getX(), this.getY(), 0, 0, this.getWidth(), this.getHeight());
+            //corners
+            RenderUtils.drawTexturedModalRect(this.getX(), this.getY(), 0, 0, 16, 16, 16,16);
+            RenderUtils.drawTexturedModalRect(this.getX(), this.getY()+16, 0, 16, 16, 256-32, 16,getHeight()-32);
+            RenderUtils.drawTexturedModalRect(this.getX(), this.getY()+getHeight()-16, 0, 256-16, 16, 16, 16, 16);
+            RenderUtils.drawTexturedModalRect(this.getX()+getWidth()-16, this.getY(), 256-16, 0, 16, 16, 16,16);
+            RenderUtils.drawTexturedModalRect(this.getX()+getWidth()-16, this.getY()+16, 256-16, 16, 16, 256-32, 16,getHeight()-32);
+            RenderUtils.drawTexturedModalRect(this.getX()+getWidth()-16, this.getY()+getHeight()-16, 256-16 , 256-16, 16, 16, 16, 16);
+            RenderUtils.drawTexturedModalRect(this.getX()+16, this.getY(), 16, 0, 256-32, 16, this.getWidth()-32, 16);
+            RenderUtils.drawTexturedModalRect(this.getX()+16, this.getY()+getHeight()-16, 16, 256-16, 256-32, 16, this.getWidth()-32, 16);
+            //
+            
+//
+//            RenderUtils.drawTexturedModalRect(this.getX(), this.getY(), 0, 0, 16, 16, this.getWidth(), this.getHeight());
+            
+            //            RenderUtils.drawTexturedModalRect(this.getX(), this.getY(), 0, 0, 256,256,this.getWidth(), this.getHeight());
             GlStateManager.popMatrix();
         }
     }

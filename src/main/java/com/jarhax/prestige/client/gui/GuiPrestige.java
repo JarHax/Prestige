@@ -4,12 +4,14 @@ import com.jarhax.prestige.Prestige;
 import com.jarhax.prestige.api.Reward;
 import com.jarhax.prestige.client.gui.objects.*;
 import com.jarhax.prestige.client.utils.RenderUtils;
+import com.jarhax.prestige.config.Config;
 import com.jarhax.prestige.data.*;
 import com.jarhax.prestige.packet.PacketGiveRewards;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
@@ -46,19 +48,20 @@ public class GuiPrestige extends GuiPrestigeBase {
     @Override
     public void onGuiClosed() {
         super.onGuiClosed();
-        String[] rewards = new String[getRewardsToGive().size()];
-        for(int i = 0; i < rewards.length; i++) {
-            rewards[i] = getRewardsToGive().get(i).getReward().getIdentifier();
-        }
-        Prestige.NETWORK.sendToServer(new PacketGiveRewards(rewards));
-        
+//        if(!Config.newWorldMode) {
+            String[] rewards = new String[getRewardsToGive().size()];
+            for(int i = 0; i < rewards.length; i++) {
+                rewards[i] = getRewardsToGive().get(i).getReward().getIdentifier();
+            }
+            Prestige.NETWORK.sendToServer(new PacketGiveRewards(rewards));
+//        }
     }
     
     @Override
     public void initGui() {
         
-        this.guiWidth = 256;
-        this.guiHeight = 256;
+        this.guiWidth = width - 40;
+        this.guiHeight = height - 40;
         super.initGui();
         this.left = this.width / 2 - this.guiWidth / 2;
         this.top = this.height / 2 - this.guiHeight / 2;

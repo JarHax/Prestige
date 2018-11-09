@@ -2,12 +2,9 @@ package com.jarhax.prestige.api;
 
 import com.google.gson.annotations.Expose;
 import com.jarhax.prestige.Prestige;
-
 import net.minecraft.init.Blocks;
-import net.minecraft.item.*;
-import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.nbt.NBTException;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.*;
 
 import java.util.*;
 
@@ -37,7 +34,6 @@ public class Reward {
      */
     @Expose
     private boolean placed;
-    
     
     public Reward(String identifier, String title, int x, int y, int cost, ItemStack icon, String description) {
         
@@ -81,8 +77,7 @@ public class Reward {
         // TODO cache result?
         try {
             return new ItemStack(JsonToNBT.getTagFromJson(this.icon));
-        }
-        catch (NBTException e) {
+        } catch(NBTException e) {
             
             Prestige.LOG.error("The reward \"{}\" has an invalid icon value of \"{}\".", this.identifier, this.icon);
             return new ItemStack(Blocks.BARRIER);
@@ -191,11 +186,16 @@ public class Reward {
     }
     
     public void setIcon(ItemStack icon) {
-
+        
         this.icon = icon.writeToNBT(new NBTTagCompound()).toString();
     }
     
     public void setCost(int cost) {
         this.cost = cost;
+    }
+    
+    
+    public void setIcon(String icon) {
+        this.icon = icon;
     }
 }

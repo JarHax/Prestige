@@ -19,6 +19,18 @@ public class RenderUtils {
         tessellator.draw();
     }
     
+    public static void drawTexturedModalRect(float x, float y, float textureX, float textureY, float textureWidth, float textureheight, float width, float height) {
+        
+        final Tessellator tessellator = Tessellator.getInstance();
+        final BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
+        bufferbuilder.pos(x, y + height, 0).tex(textureX * 0.00390625F, (textureY + textureheight) * 0.00390625F).endVertex();
+        bufferbuilder.pos(x + width, y + height, 0).tex((textureX + textureWidth) * 0.00390625F, (textureY + textureheight) * 0.00390625F).endVertex();
+        bufferbuilder.pos(x + width, y, 0).tex((textureX + textureWidth) * 0.00390625F, textureY * 0.00390625F).endVertex();
+        bufferbuilder.pos(x, y, 0).tex(textureX * 0.00390625F, textureY * 0.00390625F).endVertex();
+        tessellator.draw();
+    }
+    
     public static void drawRect(float left, float top, float right, float bottom, int color) {
         if(left < right) {
             float i = left;

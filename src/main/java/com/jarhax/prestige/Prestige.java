@@ -4,8 +4,9 @@ import com.google.gson.*;
 import com.jarhax.prestige.api.*;
 import com.jarhax.prestige.command.CommandPrestige;
 import com.jarhax.prestige.compat.crt.IReward;
+import com.jarhax.prestige.config.Config;
 import com.jarhax.prestige.data.*;
-import com.jarhax.prestige.events.CommonEventHandler;
+import com.jarhax.prestige.events.*;
 import com.jarhax.prestige.packet.*;
 import net.darkhax.bookshelf.BookshelfRegistry;
 import net.darkhax.bookshelf.network.NetworkHandler;
@@ -23,7 +24,7 @@ import java.io.*;
 import java.util.*;
 
 @EventBusSubscriber
-@Mod(modid = "prestige", name = "Prestige", version = "@VERSION@", dependencies = "required-after:bookshelf@[2.3.523,)", certificateFingerprint = "@FINGERPRINT@")
+@Mod(modid = "prestige", name = "Prestige", version = "@VERSION@", dependencies = "required-after:bookshelf@[2.3.523,)", certificateFingerprint = "@FINGERPRINT@", guiFactory = "com.jarhax.prestige.client.gui.GuiFactoryPrestige")
 public class Prestige {
     
     public static final Logger LOG = LogManager.getLogger("Prestige");
@@ -42,7 +43,7 @@ public class Prestige {
     
     @EventHandler
     public void onPreInit(FMLPreInitializationEvent event) {
-        
+        Config.init(event.getSuggestedConfigurationFile());
         NETWORK.register(PacketSyncPrestige.class, Side.CLIENT);
         NETWORK.register(PacketOpenPrestigeGUI.class, Side.CLIENT);
         NETWORK.register(PacketEditPrestigeGUI.class, Side.CLIENT);
@@ -52,6 +53,12 @@ public class Prestige {
         BookshelfRegistry.addCommand(new CommandPrestige());
         JSON_FILE = new File(new File(event.getModConfigurationDirectory(), "prestige"), "rewards.json");
         MinecraftForge.EVENT_BUS.register(new CommonEventHandler());
+    }
+    
+    @EventHandler
+    @SideOnly(Side.CLIENT)
+    public void onPreInitClient(FMLPreInitializationEvent event) {
+        MinecraftForge.EVENT_BUS.register(new ClientEventHandler());
     }
     
     @EventHandler

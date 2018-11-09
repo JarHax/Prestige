@@ -4,6 +4,7 @@ import com.jarhax.prestige.Prestige;
 import com.jarhax.prestige.api.Reward;
 import com.jarhax.prestige.client.gui.GuiPrestigeBase;
 import com.jarhax.prestige.client.utils.RenderUtils;
+import com.jarhax.prestige.config.Config;
 import com.jarhax.prestige.packet.PacketAttemptPurchase;
 import net.minecraft.client.renderer.*;
 import net.minecraft.item.ItemStack;
@@ -44,9 +45,14 @@ public class GuiObjectReward extends GuiObject {
         
         this.mc.getTextureManager().bindTexture(BACKGROUND);
         if(isPurchased()) {
-            GlStateManager.color(0, 0.8f, 0.8f);
+            float[] argb = Config.getARGB(Config.purchasedColour);
+            GlStateManager.color(argb[1], argb[2], argb[3]);
         } else if(!Prestige.clientPlayerData.canPurchase(getReward())) {
-            GlStateManager.color(0.8f, 0f, 0f);
+            float[] argb = Config.getARGB(Config.unavailableColour);
+            GlStateManager.color(argb[1], argb[2], argb[3]);
+        }else{
+            float[] argb = Config.getARGB(Config.purchaseableColour);
+            GlStateManager.color(argb[1], argb[2], argb[3]);
         }
         GlStateManager.enableBlend();
         GlStateManager.blendFunc(770, 771);
