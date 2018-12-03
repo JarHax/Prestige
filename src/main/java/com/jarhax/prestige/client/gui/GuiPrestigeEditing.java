@@ -145,9 +145,9 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
     
     @Override
     public void initGui() {
-        
-        this.guiWidth = 256;
-        this.guiHeight = 256;
+    
+        this.guiWidth = width - width/2;
+        this.guiHeight = height;
         super.initGui();
         this.left = this.width / 2 - this.guiWidth / 2;
         this.top = this.height / 2 - this.guiHeight / 2;
