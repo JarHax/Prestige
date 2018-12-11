@@ -37,6 +37,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
     private GuiTextField fieldName;
     private GuiTextField fieldDesc;
     private GuiTextField fieldCost;
+    private GuiTextField fieldSellPrice;
     private GuiTextField fieldID;
     private GuiTextField fieldFilter;
     
@@ -58,6 +59,21 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
     
     public static final File FILE_TEMP = new File(Prestige.JSON_FILE.getParentFile(), "backup_file.json");
     public boolean saveChanges;
+    
+    private static boolean validateText(String input) {
+        if(input == null || input.isEmpty()) {
+            return true;
+        }
+        try {
+            Integer.parseInt(input);
+            return true;
+        } catch(Exception e) {
+            if(input.equalsIgnoreCase("-")){
+                return true;
+            }
+            return false;
+        }
+    }
     
     public void generateRewards() {
         unplacedRewards.clear();
@@ -145,8 +161,8 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
     
     @Override
     public void initGui() {
-    
-        this.guiWidth = width - width/2;
+        
+        this.guiWidth = width - width / 2;
         this.guiHeight = height;
         super.initGui();
         this.left = this.width / 2 - this.guiWidth / 2;
@@ -164,30 +180,23 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         fieldName.setMaxStringLength(Integer.MAX_VALUE);
         fieldDesc = new GuiTextField(0, fontRenderer, left + guiWidth + 5, top + yOffset + (28 * count++), 100, fontRenderer.FONT_HEIGHT + 4);
         fieldDesc.setMaxStringLength(Integer.MAX_VALUE);
-        fieldCost = new GuiTextField(0, fontRenderer, left + guiWidth + 5, top + yOffset + (28 * count++), 100, fontRenderer.FONT_HEIGHT + 4);
+        fieldCost = new GuiTextField(0, fontRenderer, left + guiWidth + 5, top + yOffset + (28 * count), 30, fontRenderer.FONT_HEIGHT + 4);
         fieldCost.setMaxStringLength(Integer.MAX_VALUE);
-        
+        fieldSellPrice = new GuiTextField(0, fontRenderer, left + guiWidth + 5 + 35, top + yOffset + (28 * count++), 50, fontRenderer.FONT_HEIGHT + 4);
+        fieldSellPrice.setMaxStringLength(Integer.MAX_VALUE);
         fieldFilter = new GuiTextField(0, fontRenderer, left + guiWidth + 5, top + yOffset + (28 * count++), 100, fontRenderer.FONT_HEIGHT + 4);
         fieldFilter.setMaxStringLength(Integer.MAX_VALUE);
         
-        fieldCost.setValidator(input -> {
-            if(input == null || input.isEmpty()) {
-                return true;
-            }
-            try {
-                Integer.parseInt(input);
-                return true;
-            } catch(Exception e) {
-                return false;
-            }
-        });
-        
+        fieldCost.setValidator(GuiPrestigeEditing::validateText);
+        fieldSellPrice.setValidator(input -> validateText(input));
         fieldName.setEnabled(true);
         fieldDesc.setEnabled(true);
         fieldCost.setEnabled(true);
+        fieldSellPrice.setEnabled(true);
         fieldID.setEnabled(true);
         fieldFilter.setEnabled(true);
         fieldCost.setText("0");
+        fieldSellPrice.setText("0");
         count = 0;
         buttonCreateNewReward = new GuiButtonTooltip(0, left + guiWidth + 5 + (20 * count++), top, 20, 20, "+", this, "Add");
         buttonRemoveReward = new GuiButtonTooltip(1, left + guiWidth + 5 + (20 * count++), top, 20, 20, "-", this, "Remove");
@@ -244,6 +253,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
             fieldName.updateCursorCounter();
             fieldDesc.updateCursorCounter();
             fieldCost.updateCursorCounter();
+            fieldSellPrice.updateCursorCounter();
             fieldID.updateCursorCounter();
             fieldFilter.updateCursorCounter();
             
@@ -288,7 +298,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                 GL11.glTranslated(parent.getX() + parent.getWidth() / 2, parent.getY() + parent.getHeight() / 2, 0);
                 GL11.glRotated(angle, 0, 0, 1);
                 float length = (float) start.distanceTo(end);
-                RenderUtils.drawTexturedModalRect(0, 0, RenderUtils.remap((float) (System.nanoTime() / 1000000000.0), 1, 0, 0, 16), 0, length, 4);
+                RenderUtils.drawTexturedModalRect(0, -2, RenderUtils.remap((float) (System.nanoTime() / 1000000000.0), 1, 0, 0, 16), 0, length, 4);
                 GL11.glTranslated(-(parent.getX() + parent.getWidth() / 2), -(parent.getY() + parent.getHeight() / 2), 0);
                 GlStateManager.popMatrix();
             }
@@ -533,6 +543,10 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
         fieldDesc.drawTextBox();
         fontRenderer.drawStringWithShadow("Cost: ", fieldCost.x, fieldCost.y - 11, 0xFFFFFF);
         fieldCost.drawTextBox();
+        
+        fontRenderer.drawStringWithShadow("Sell Price: ", fieldSellPrice.x, fieldSellPrice.y - 11, 0xFFFFFF);
+        fieldSellPrice.drawTextBox();
+        
         fontRenderer.drawStringWithShadow("ID: ", fieldID.x, fieldID.y - 11, 0xFFFFFF);
         fieldID.drawTextBox();
         
@@ -680,6 +694,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
     @Override
     protected void keyTyped(char typedChar, int keyCode) throws IOException {
         super.keyTyped(typedChar, keyCode);
+        //TODO tab for sell price
         if(typedChar == '\t') {
             if(fieldID.isFocused()) {
                 fieldName.setFocused(true);
@@ -691,8 +706,11 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                 fieldCost.setFocused(true);
                 fieldDesc.setFocused(false);
             } else if(fieldCost.isFocused()) {
-                fieldFilter.setFocused(true);
+                fieldSellPrice.setFocused(true);
                 fieldCost.setFocused(false);
+            } else if(fieldSellPrice.isFocused()) {
+                fieldFilter.setFocused(true);
+                fieldSellPrice.setFocused(false);
             } else if(fieldFilter.isFocused()) {
                 fieldID.setFocused(true);
                 fieldFilter.setFocused(false);
@@ -701,6 +719,8 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
             fieldName.textboxKeyTyped(typedChar, keyCode);
             fieldDesc.textboxKeyTyped(typedChar, keyCode);
             fieldCost.textboxKeyTyped(typedChar, keyCode);
+            fieldSellPrice.textboxKeyTyped(typedChar, keyCode);
+            
             fieldID.textboxKeyTyped(typedChar, keyCode);
             if(fieldFilter.textboxKeyTyped(typedChar, keyCode)) {
                 generateStackList();
@@ -814,6 +834,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                         editingReward = reward;
                         fieldName.setText(editingReward.getReward().getTitle());
                         fieldCost.setText(editingReward.getReward().getCost() + "");
+                        fieldSellPrice.setText(editingReward.getReward().getSellPrice() + "");
                         fieldDesc.setText(editingReward.getReward().getDescription());
                         fieldID.setText(editingReward.getReward().getIdentifier());
                         selectedStack = getStack(editingReward.getReward().getIcon());
@@ -829,6 +850,9 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
             successful = true;
         }
         if(fieldCost.mouseClicked(mouseX, mouseY, mouseButton)) {
+            successful = true;
+        }
+        if(fieldSellPrice.mouseClicked(mouseX, mouseY, mouseButton)) {
             successful = true;
         }
         if(fieldID.mouseClicked(mouseX, mouseY, mouseButton)) {
@@ -916,11 +940,15 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                 if(fieldCost.getText().isEmpty()) {
                     fieldCost.setText(0 + "");
                 }
-                Prestige.REGISTRY.put(id, new Reward(id, fieldName.getText(), 0, 0, Integer.parseInt(fieldCost.getText()), selectedStack.getStack(), fieldDesc.getText()));
+                if(fieldSellPrice.getText().isEmpty()) {
+                    fieldSellPrice.setText("0");
+                }
+                Prestige.REGISTRY.put(id, new Reward(id, fieldName.getText(), 0, 0, Integer.parseInt(fieldCost.getText()), Integer.parseInt(fieldSellPrice.getText()), selectedStack.getStack(), fieldDesc.getText()));
                 fieldName.setText("");
                 fieldDesc.setText("");
                 fieldID.setText("");
                 fieldCost.setText("0");
+                fieldSellPrice.setText("0");
             }
         }
         
@@ -943,6 +971,9 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                 if(fieldCost.getText().isEmpty()) {
                     fieldCost.setText(0 + "");
                 }
+                if(fieldSellPrice.getText().isEmpty()) {
+                    fieldSellPrice.setText(0 + "");
+                }
                 Reward updated;
                 if(editingReward != null) {
                     updated = editingReward.getReward();
@@ -952,6 +983,7 @@ public class GuiPrestigeEditing extends GuiPrestigeBase {
                 updated.setTitle(fieldName.getText());
                 updated.setDescription(fieldDesc.getText());
                 updated.setCost(Integer.parseInt(fieldCost.getText()));
+                updated.setSellPrice(Integer.parseInt(fieldSellPrice.getText()));
                 updated.setIcon(selectedStack.getStack());
             }
         }

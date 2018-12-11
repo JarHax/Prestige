@@ -1,9 +1,9 @@
 package com.jarhax.prestige;
 
 import com.google.gson.*;
-import com.jarhax.prestige.api.*;
+import com.jarhax.prestige.api.Reward;
 import com.jarhax.prestige.command.CommandPrestige;
-import com.jarhax.prestige.compat.crt.IReward;
+import com.jarhax.prestige.compat.crt.*;
 import com.jarhax.prestige.config.Config;
 import com.jarhax.prestige.data.*;
 import com.jarhax.prestige.events.*;
@@ -32,6 +32,7 @@ public class Prestige {
     public static final Map<String, Reward> REGISTRY = new HashMap<>();
     
     public static final HashMap<String, List<IReward>> REWARDS = new HashMap<>();
+    public static final HashMap<String, List<ISellAction>> SELL_ACTIONS = new HashMap<>();
     
     @SideOnly(Side.CLIENT)
     public static PlayerData clientPlayerData;
@@ -49,7 +50,10 @@ public class Prestige {
         NETWORK.register(PacketEditPrestigeGUI.class, Side.CLIENT);
         NETWORK.register(PacketAttemptPurchase.class, Side.SERVER);
         NETWORK.register(PacketGiveRewards.class, Side.SERVER);
-    
+        NETWORK.register(PacketSellRewards.class, Side.SERVER);
+        NETWORK.register(PacketRespec.class, Side.SERVER);
+        NETWORK.register(PacketAttemptSell.class, Side.SERVER);
+        
         BookshelfRegistry.addCommand(new CommandPrestige());
         JSON_FILE = new File(new File(event.getModConfigurationDirectory(), "prestige"), "rewards.json");
         MinecraftForge.EVENT_BUS.register(new CommonEventHandler());
@@ -58,6 +62,8 @@ public class Prestige {
     @EventHandler
     @SideOnly(Side.CLIENT)
     public void onPreInitClient(FMLPreInitializationEvent event) {
+        ClientEventHandler.initKeys();
+        
         MinecraftForge.EVENT_BUS.register(new ClientEventHandler());
     }
     

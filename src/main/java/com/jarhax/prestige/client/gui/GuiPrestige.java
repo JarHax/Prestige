@@ -4,14 +4,13 @@ import com.jarhax.prestige.Prestige;
 import com.jarhax.prestige.api.Reward;
 import com.jarhax.prestige.client.gui.objects.*;
 import com.jarhax.prestige.client.utils.RenderUtils;
-import com.jarhax.prestige.config.Config;
-import com.jarhax.prestige.data.*;
-import com.jarhax.prestige.packet.PacketGiveRewards;
-import net.minecraft.client.gui.ScaledResolution;
+import com.jarhax.prestige.packet.*;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.*;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
-import org.lwjgl.input.Keyboard;
+import net.minecraftforge.fml.client.config.GuiButtonExt;
 import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
@@ -28,6 +27,7 @@ public class GuiPrestige extends GuiPrestigeBase {
     private final int south = 2;
     private final int west = 3;
     
+    private boolean respec;
     
     public void generateRewards() {
         guiObjects.clear();
@@ -48,14 +48,24 @@ public class GuiPrestige extends GuiPrestigeBase {
     @Override
     public void onGuiClosed() {
         super.onGuiClosed();
-//        if(!Config.newWorldMode) {
-            String[] rewards = new String[getRewardsToGive().size()];
-            for(int i = 0; i < rewards.length; i++) {
-                rewards[i] = getRewardsToGive().get(i).getReward().getIdentifier();
-            }
-            Prestige.NETWORK.sendToServer(new PacketGiveRewards(rewards));
-//        }
+        //        if(!Config.newWorldMode) {
+        String[] rewards = new String[getRewardsToGive().size()];
+        for(int i = 0; i < rewards.length; i++) {
+            rewards[i] = getRewardsToGive().get(i).getReward().getIdentifier();
+        }
+        Prestige.NETWORK.sendToServer(new PacketGiveRewards(rewards));
+    
+        String[] sellActions = new String[getRewardsToSell().size()];
+        for(int i = 0; i < sellActions.length; i++) {
+            sellActions[i] = getRewardsToSell().get(i).getReward().getIdentifier();
+        }
+        Prestige.NETWORK.sendToServer(new PacketSellRewards(sellActions));
+        //        }
     }
+    
+    public GuiButtonExt confirmBtn;
+    public GuiButtonExt cancelBtn;
+    public GuiButtonExt respecBtn;
     
     @Override
     public void initGui() {
@@ -72,11 +82,21 @@ public class GuiPrestige extends GuiPrestigeBase {
         
         generateRewards();
         rewardsToGive = new LinkedList<>();
+        rewardsToSell = new LinkedList<>();
+        respecBtn = new GuiButtonExt(0, guiWidth - 46, guiHeight + 5, 50, fontRenderer.FONT_HEIGHT + 2, "Respec");
+        confirmBtn = new GuiButtonExt(1, width / 2 - 55, guiHeight / 2 + (fontRenderer.FONT_HEIGHT + 2) / 2, 50, fontRenderer.FONT_HEIGHT + 2, "Confirm");
+        cancelBtn = new GuiButtonExt(2, width / 2 + 5, guiHeight / 2 + (fontRenderer.FONT_HEIGHT + 2) / 2, 50, fontRenderer.FONT_HEIGHT + 2, "Cancel");
+        
+        
+        buttonList.add(respecBtn);
+        buttonList.add(confirmBtn);
+        buttonList.add(cancelBtn);
+        confirmBtn.visible = false;
+        cancelBtn.visible = false;
     }
     
     @Override
     public void updateScreen() {
-        
         super.updateScreen();
         for(final GuiObject object : this.guiObjects.values()) {
             object.update();
@@ -110,7 +130,6 @@ public class GuiPrestige extends GuiPrestigeBase {
     
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        
         GlStateManager.pushMatrix();
         this.backGround.draw(this.left, this.top, mouseX, mouseY, partialTicks);
         this.mc.getTextureManager().bindTexture(new ResourceLocation("prestige", "textures/gui/gui_prestige_line.png"));
@@ -132,7 +151,7 @@ public class GuiPrestige extends GuiPrestigeBase {
                 GL11.glTranslated(parent.getX() + parent.getWidth() / 2, parent.getY() + parent.getHeight() / 2, 0);
                 GL11.glRotated(angle, 0, 0, 1);
                 float length = (float) start.distanceTo(end);
-                RenderUtils.drawTexturedModalRect(0, 0, RenderUtils.remap((float) (System.nanoTime() / 1000000000.0), 1, 0, 0, 16), 0, length, 4);
+                RenderUtils.drawTexturedModalRect(0, -2, RenderUtils.remap((float) (System.nanoTime() / 1000000000.0), 1, 0, 0, 16), 0, length, 4);
                 GL11.glTranslated(-(parent.getX() + parent.getWidth() / 2), -(parent.getY() + parent.getHeight() / 2), 0);
                 GlStateManager.popMatrix();
             }
@@ -248,8 +267,17 @@ public class GuiPrestige extends GuiPrestigeBase {
                 GlStateManager.popMatrix();
             }
         }
-        super.drawScreen(mouseX, mouseY, partialTicks);
         
+        
+        GlStateManager.translate(0, 0, 1000);
+        if(respec) {
+            int padding = 20;
+            RenderUtils.drawRect(padding, padding, width - padding, height - padding, 0xAA111111);
+            String text = "This action will remove all your unlocked rewards, are you sure you want to do this?";
+            fontRenderer.drawString(text, width / 2 - fontRenderer.getStringWidth(text) / 2, height / 2 - 40, 0xFFFFFF);
+        }
+        super.drawScreen(mouseX, mouseY, partialTicks);
+        GlStateManager.translate(0, 0, -1000);
         
     }
     
@@ -273,40 +301,79 @@ public class GuiPrestige extends GuiPrestigeBase {
     @Override
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         
-        super.mouseClicked(mouseX, mouseY, mouseButton);
         this.prevMX = mouseX;
         this.prevMY = mouseY;
         
-        if(mouseButton == 0) {
-            boolean valid = true;
-            
-            for(final GuiObject object : this.guiObjects.values()) {
-                if(object.collides(mouseX, mouseY, mouseX, mouseY)) {
-                    valid = false;
-                }
-                object.mouseClicked(mouseX, mouseY, mouseButton);
+        if(!respec) {
+            if(mouseButton == 0) {
+                boolean valid = true;
                 
+                for(final GuiObject object : this.guiObjects.values()) {
+                    if(object.collides(mouseX, mouseY, mouseX, mouseY)) {
+                        valid = false;
+                    }
+                    object.mouseClicked(mouseX, mouseY, mouseButton);
+                    
+                }
+                
+                if(valid)
+                    backGround.mouseClicked(mouseX, mouseY, mouseButton);
+            } else if(mouseButton == 1) {
+                boolean valid = true;
+                
+                for(final GuiObject object : this.guiObjects.values()) {
+                    if(object.collides(mouseX, mouseY, mouseX, mouseY)) {
+                        valid = false;
+                    }
+                    object.mouseClicked(mouseX, mouseY, mouseButton);
+                    
+                }
+                
+                if(valid)
+                    backGround.mouseClicked(mouseX, mouseY, mouseButton);
             }
             
-            if(valid)
-                backGround.mouseClicked(mouseX, mouseY, mouseButton);
         }
-        
-        
+        super.mouseClicked(mouseX, mouseY, mouseButton);
     }
     
+    @Override
+    protected void actionPerformed(GuiButton button) throws IOException {
+        super.actionPerformed(button);
+        if(button.id == 0) {
+            respec = true;
+            respecBtn.visible = false;
+            confirmBtn.visible = true;
+            cancelBtn.visible = true;
+        } else if(button.id == 1) {
+            respec = false;
+            respecBtn.visible = true;
+            confirmBtn.visible = false;
+            cancelBtn.visible = false;
+            getRewardsToGive().clear();
+            Prestige.clientPlayerData.getUnlockedRewards().clear();
+            Prestige.NETWORK.sendToServer(new PacketRespec());
+            Minecraft.getMinecraft().displayGuiScreen(new GuiPrestige());
+        } else if(button.id == 2) {
+            respec = false;
+            respecBtn.visible = true;
+            confirmBtn.visible = false;
+            cancelBtn.visible = false;
+        }
+    }
     
     @Override
     protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
         
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-        
-        for(GuiObjectReward object : this.guiObjects.values()) {
-            object.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+        if(!respec) {
+            for(GuiObjectReward object : this.guiObjects.values()) {
+                object.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+            }
+            backGround.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+            this.prevMX = mouseX;
+            this.prevMY = mouseY;
         }
-        backGround.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-        this.prevMX = mouseX;
-        this.prevMY = mouseY;
         
     }
     
@@ -314,11 +381,13 @@ public class GuiPrestige extends GuiPrestigeBase {
     protected void mouseReleased(int mouseX, int mouseY, int state) {
         
         super.mouseReleased(mouseX, mouseY, state);
-        this.prevMX = -1;
-        this.prevMY = -1;
-        backGround.mouseReleased(mouseX, mouseY, state);
-        for(final GuiObject object : this.guiObjects.values()) {
-            object.mouseReleased(mouseX, mouseY, state);
+        if(!respec) {
+            this.prevMX = -1;
+            this.prevMY = -1;
+            backGround.mouseReleased(mouseX, mouseY, state);
+            for(final GuiObject object : this.guiObjects.values()) {
+                object.mouseReleased(mouseX, mouseY, state);
+            }
         }
     }
     

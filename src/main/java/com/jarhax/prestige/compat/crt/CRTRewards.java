@@ -3,17 +3,7 @@ package com.jarhax.prestige.compat.crt;
 import com.jarhax.prestige.Prestige;
 import crafttweaker.*;
 import crafttweaker.annotations.ZenRegister;
-import crafttweaker.api.minecraft.CraftTweakerMC;
-import crafttweaker.api.player.IPlayer;
-import crafttweaker.api.world.IWorld;
-import crafttweaker.mc1120.command.MCCommandSender;
-import crafttweaker.mc1120.server.ServerPlayer;
-import net.minecraft.client.gui.GuiChat;
-import net.minecraft.command.*;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import stanhebben.zenscript.annotations.*;
 
 import java.util.*;
@@ -38,8 +28,27 @@ public class CRTRewards {
                 return "Adding reward: " + name + ".";
             }
         });
+    }
+    
+    @ZenMethod
+    public static void registerSellAction(String name, ISellAction reward) {
+        CraftTweakerAPI.apply(new IAction() {
+            @Override
+            public void apply() {
+                List<ISellAction> list = Prestige.SELL_ACTIONS.getOrDefault(name, new LinkedList<>());
+                list.add(reward);
+                Prestige.SELL_ACTIONS.put(name, list);
+            }
+            
+            @Override
+            public String describe() {
+                return "Adding sell action: " + name + ".";
+            }
+        });
         
     }
+    
+    
     
     @ZenMethod
     public static void registerCommandReward(String name, String command) {
@@ -47,13 +56,9 @@ public class CRTRewards {
             @Override
             public void apply() {
                 List<IReward> list = Prestige.REWARDS.getOrDefault(name, new LinkedList<>());
-                list.add(new IReward() {
-                    @Override
-                    public void process(IWorld world, IPlayer player) {
-                        EntityPlayer pl = (EntityPlayer) player.getInternal();
-                        pl.getServer().getCommandManager().executeCommand(pl.getServer(), command.replace("@p", pl.getDisplayNameString()));
-//                        player.getServer().getCommandManager().executeCommand(new MCCommandSender((ICommandSender) CraftTweakerAPI.server.getInternal()), command.replace("@p", player.getDisplayName()));
-                    }
+                list.add((world, player) -> {
+                    EntityPlayer pl = (EntityPlayer) player.getInternal();
+                    pl.getServer().getCommandManager().executeCommand(pl.getServer(), command.replace("@p", pl.getDisplayNameString()));
                 });
                 Prestige.REWARDS.put(name, list);
             }

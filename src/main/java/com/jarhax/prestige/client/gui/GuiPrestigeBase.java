@@ -1,9 +1,6 @@
 package com.jarhax.prestige.client.gui;
 
-import com.jarhax.prestige.client.gui.objects.*;
-import com.jarhax.prestige.client.gui.objects.editing.GuiObjectEditingReward;
-import com.jarhax.prestige.compat.crt.IReward;
-import com.jarhax.prestige.data.PlayerData;
+import com.jarhax.prestige.client.gui.objects.GuiObjectReward;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 
@@ -24,6 +21,7 @@ public class GuiPrestigeBase extends GuiScreen {
     public EntityPlayer player;
     
     protected LinkedList<GuiObjectReward> rewardsToGive;
+    protected LinkedList<GuiObjectReward> rewardsToSell;
     
     public Map<String, GuiObjectReward> getGuiObjects() {
         return guiObjects;
@@ -68,4 +66,11 @@ public class GuiPrestigeBase extends GuiScreen {
         this.rewardsToGive = rewardsToGive;
     }
     
+    public LinkedList<GuiObjectReward> getRewardsToSell() {
+        return rewardsToSell;
+    }
+    
+    public void setRewardsToSell(LinkedList<GuiObjectReward> rewardsToSell) {
+        this.rewardsToSell = rewardsToSell;
+    }
 }

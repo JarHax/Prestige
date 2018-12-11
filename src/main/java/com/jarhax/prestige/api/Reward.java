@@ -26,6 +26,9 @@ public class Reward {
     private int cost;
     
     @Expose
+    private int sellPrice;
+    
+    @Expose
     private final Set<String> parents = new HashSet<>();
     @Expose
     private final Set<String> children = new HashSet<>();
@@ -35,7 +38,7 @@ public class Reward {
     @Expose
     private boolean placed;
     
-    public Reward(String identifier, String title, int x, int y, int cost, ItemStack icon, String description) {
+    public Reward(String identifier, String title, int x, int y, int cost, int sellPrice, ItemStack icon, String description) {
         
         if(identifier == null || identifier.isEmpty()) {
             
@@ -55,6 +58,7 @@ public class Reward {
         this.x = x;
         this.y = y;
         this.cost = cost;
+        this.sellPrice = sellPrice;
     }
     
     public String getIdentifier() {
@@ -97,6 +101,14 @@ public class Reward {
     public int getCost() {
         
         return this.cost;
+    }
+    
+    public int getSellPrice() {
+        return sellPrice;
+    }
+    
+    public void setSellPrice(int sellPrice) {
+        this.sellPrice = sellPrice;
     }
     
     public Set<Reward> getChildren() {

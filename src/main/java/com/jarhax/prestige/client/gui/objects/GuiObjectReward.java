@@ -5,7 +5,7 @@ import com.jarhax.prestige.api.Reward;
 import com.jarhax.prestige.client.gui.GuiPrestigeBase;
 import com.jarhax.prestige.client.utils.RenderUtils;
 import com.jarhax.prestige.config.Config;
-import com.jarhax.prestige.packet.PacketAttemptPurchase;
+import com.jarhax.prestige.packet.*;
 import net.minecraft.client.renderer.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -50,7 +50,7 @@ public class GuiObjectReward extends GuiObject {
         } else if(!Prestige.clientPlayerData.canPurchase(getReward())) {
             float[] argb = Config.getARGB(Config.unavailableColour);
             GlStateManager.color(argb[1], argb[2], argb[3]);
-        }else{
+        } else {
             float[] argb = Config.getARGB(Config.purchaseableColour);
             GlStateManager.color(argb[1], argb[2], argb[3]);
         }
@@ -91,7 +91,10 @@ public class GuiObjectReward extends GuiObject {
         for(String s : reward.getDescription().split("\\\\n")) {
             text.add("- " + s.replaceAll("\\\\t", "    "));
         }
-        text.add("- costs: " + reward.getCost());
+        text.add("- costs: " + reward.getCost() + " prestige points");
+        
+        if(getReward().getSellPrice() >= 0)
+            text.add("Right click to sell for " + reward.getSellPrice() + " prestige points");
         
         getParent().drawHoveringText(text, mouseX, mouseY);
         GlStateManager.disableLighting();
@@ -104,11 +107,31 @@ public class GuiObjectReward extends GuiObject {
     public void mouseClicked(int mouseX, int mouseY, int mouseButton) {
         
         super.mouseClicked(mouseX, mouseY, mouseButton);
-        if(collides(mouseX, mouseY, mouseX, mouseY)) {
-            if(Prestige.clientPlayerData.canPurchase(getReward())) {
-                setPurchased(true);
-                parent.getRewardsToGive().add(this);
-                Prestige.NETWORK.sendToServer(new PacketAttemptPurchase(getReward()));
+        if(mouseButton == 0) {
+            if(collides(mouseX, mouseY, mouseX, mouseY)) {
+                if(Prestige.clientPlayerData.canPurchase(getReward())) {
+                    setPurchased(true);
+                    parent.getRewardsToGive().add(this);
+                    parent.getRewardsToSell().remove(this);
+                    Prestige.NETWORK.sendToServer(new PacketAttemptPurchase(getReward()));
+                }
+            }
+        } else if(mouseButton == 1) {
+            if(collides(mouseX, mouseY, mouseX, mouseY)) {
+                if(Prestige.clientPlayerData.hasReward(getReward()) && getReward().getSellPrice() >= 0) {
+                    boolean valid = true;
+                    for(Reward child : getReward().getChildren()) {
+                        if(Prestige.clientPlayerData.hasReward(child)) {
+                            valid = false;
+                        }
+                    }
+                    if(valid) {
+                        parent.getRewardsToSell().add(this);
+                        parent.getRewardsToGive().remove(this);
+                        Prestige.NETWORK.sendToServer(new PacketAttemptSell(getReward()));
+                        setPurchased(false);
+                    }
+                }
             }
         }
     }
