@@ -15,11 +15,13 @@ public class PlayerData {
     private static final String TAG_CONFIRMED = "Prestige";
     private static final String TAG_UNLOCKED = "Unlocked";
     private static final String TAG_SOURCES = "Sources";
+    private static final String TAG_LAST_RESPEC = "LastRespec";
     
     private UUID playerId;
     private long prestige;
     private final Set<Reward> unlockedRewards;
     private final Set<String> sources;
+    private long lastRespec;
     
     public PlayerData(EntityPlayer player) {
         
@@ -32,6 +34,7 @@ public class PlayerData {
         this.prestige = 0;
         this.unlockedRewards = new HashSet<>();
         this.sources = new HashSet<>();
+        this.lastRespec = 0;
     }
     
     public PlayerData(NBTTagCompound tag) {
@@ -40,6 +43,7 @@ public class PlayerData {
         this.prestige = tag.getLong(TAG_CONFIRMED);
         this.unlockedRewards = (Set<Reward>) NBTUtils.readCollection(new HashSet<Reward>(), tag.getTagList(TAG_UNLOCKED, NBT.TAG_STRING), Prestige.REGISTRY::get);
         this.sources = (Set<String>) NBTUtils.readCollection(new HashSet<String>(), tag.getTagList(TAG_SOURCES, NBT.TAG_STRING), string -> string);
+        this.lastRespec = tag.getLong(TAG_LAST_RESPEC);
     }
     
     public NBTTagCompound save() {
@@ -59,7 +63,7 @@ public class PlayerData {
         }
         tag.setTag(TAG_UNLOCKED, tagList);
         tag.setTag(TAG_SOURCES, NBTUtils.writeCollection(this.sources, string -> string));
-        
+        tag.setLong(TAG_LAST_RESPEC, this.lastRespec);
         return tag;
     }
     
@@ -155,5 +159,14 @@ public class PlayerData {
         }
         
         return true;
+    }
+    
+    
+    public long getLastRespec() {
+        return lastRespec;
+    }
+    
+    public void setLastRespec(long lastRespec) {
+        this.lastRespec = lastRespec;
     }
 }

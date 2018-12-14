@@ -15,6 +15,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class GuiPrestige extends GuiPrestigeBase {
     
@@ -48,19 +49,17 @@ public class GuiPrestige extends GuiPrestigeBase {
     @Override
     public void onGuiClosed() {
         super.onGuiClosed();
-        //        if(!Config.newWorldMode) {
         String[] rewards = new String[getRewardsToGive().size()];
         for(int i = 0; i < rewards.length; i++) {
             rewards[i] = getRewardsToGive().get(i).getReward().getIdentifier();
         }
         Prestige.NETWORK.sendToServer(new PacketGiveRewards(rewards));
-    
+        
         String[] sellActions = new String[getRewardsToSell().size()];
         for(int i = 0; i < sellActions.length; i++) {
             sellActions[i] = getRewardsToSell().get(i).getReward().getIdentifier();
         }
         Prestige.NETWORK.sendToServer(new PacketSellRewards(sellActions));
-        //        }
     }
     
     public GuiButtonExt confirmBtn;
@@ -125,6 +124,33 @@ public class GuiPrestige extends GuiPrestigeBase {
                     object.setVisible(false);
                 }
             }
+        }
+        
+        
+        long sells = Prestige.clientPlayerData.getPrestige();
+        for(Reward reward : Prestige.clientPlayerData.getUnlockedRewards()) {
+            sells += reward.getSellPrice();
+        }
+        
+        long cost = Math.round(sells / 10f);
+        if(Prestige.clientPlayerData.getPrestige() >= cost) {
+            confirmBtn.enabled = true;
+        } else {
+            confirmBtn.enabled = false;
+        }
+        
+        //        long lastRespecSec = (long) (lastRespec/1e+9);
+        //        System.out.println(lastRespecSec + ":" + ((long)(System.nanoTime()/1e+9)));
+        long l = TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - Prestige.clientPlayerData.getLastRespec());
+        int time = 5 * 60;
+        if(l <= time) {
+            confirmBtn.enabled = false;
+            respecBtn.enabled = false;
+            respecBtn.displayString = "" + (time - TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - Prestige.clientPlayerData.getLastRespec()));
+        } else {
+            confirmBtn.enabled = true;
+            respecBtn.enabled = true;
+            respecBtn.displayString = "Respec";
         }
     }
     
@@ -274,6 +300,16 @@ public class GuiPrestige extends GuiPrestigeBase {
             int padding = 20;
             RenderUtils.drawRect(padding, padding, width - padding, height - padding, 0xAA111111);
             String text = "This action will remove all your unlocked rewards, are you sure you want to do this?";
+            fontRenderer.drawString(text, width / 2 - fontRenderer.getStringWidth(text) / 2, height / 2 - 40 - (fontRenderer.FONT_HEIGHT * 2), 0xFFFFFF);
+            long sells = 0;
+            for(Reward reward : Prestige.clientPlayerData.getUnlockedRewards()) {
+                sells += reward.getSellPrice();
+            }
+            text = "By doing this, you will receive " + sells + " prestige points.";
+            fontRenderer.drawString(text, width / 2 - fontRenderer.getStringWidth(text) / 2, height / 2 - 40 - (fontRenderer.FONT_HEIGHT), 0xFFFFFF);
+            
+            long cost = (long) Math.ceil((Prestige.clientPlayerData.getPrestige() + sells) / 10f);
+            text = "You will need " + cost + " prestige points to complete this action.";
             fontRenderer.drawString(text, width / 2 - fontRenderer.getStringWidth(text) / 2, height / 2 - 40, 0xFFFFFF);
         }
         super.drawScreen(mouseX, mouseY, partialTicks);
@@ -350,6 +386,15 @@ public class GuiPrestige extends GuiPrestigeBase {
             respecBtn.visible = true;
             confirmBtn.visible = false;
             cancelBtn.visible = false;
+            
+            long sells = 0;
+            for(Reward reward : Prestige.clientPlayerData.getUnlockedRewards()) {
+                sells += reward.getSellPrice();
+            }
+            long ceil = (long) Math.ceil((Prestige.clientPlayerData.getPrestige() + sells) / 10f);
+            sells -= ceil;
+            Prestige.clientPlayerData.setLastRespec(System.nanoTime());
+            Prestige.clientPlayerData.addPrestige(sells);
             getRewardsToGive().clear();
             Prestige.clientPlayerData.getUnlockedRewards().clear();
             Prestige.NETWORK.sendToServer(new PacketRespec());

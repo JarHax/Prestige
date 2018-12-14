@@ -48,7 +48,26 @@ public class CRTRewards {
         
     }
     
-    
+    @ZenMethod
+    public static void registerSellCommand(String name, String command) {
+        CraftTweakerAPI.apply(new IAction() {
+            @Override
+            public void apply() {
+                List<ISellAction> list = Prestige.SELL_ACTIONS.getOrDefault(name, new LinkedList<>());
+                list.add((world, player) -> {
+                    EntityPlayer pl = (EntityPlayer) player.getInternal();
+                    pl.getServer().getCommandManager().executeCommand(pl.getServer(), command.replace("@p", pl.getDisplayNameString()));
+                });
+                Prestige.SELL_ACTIONS.put(name, list);
+            }
+            
+            @Override
+            public String describe() {
+                return "Adding reward: " + name + ".";
+            }
+        });
+        
+    }
     
     @ZenMethod
     public static void registerCommandReward(String name, String command) {
