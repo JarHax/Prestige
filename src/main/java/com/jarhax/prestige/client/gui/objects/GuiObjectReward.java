@@ -93,8 +93,8 @@ public class GuiObjectReward extends GuiObject {
         }
         text.add("- costs: " + reward.getCost() + " prestige points");
         
-        if(getReward().getSellPrice() >= 0)
-            text.add("Right click to sell for " + reward.getSellPrice() + " prestige points");
+//        if(getReward().getSellPrice() >= 0)
+//            text.add("Right click to sell for " + reward.getSellPrice() + " prestige points");
         
         getParent().drawHoveringText(text, mouseX, mouseY);
         GlStateManager.disableLighting();
@@ -116,23 +116,23 @@ public class GuiObjectReward extends GuiObject {
                     Prestige.NETWORK.sendToServer(new PacketAttemptPurchase(getReward()));
                 }
             }
-        } else if(mouseButton == 1) {
-            if(collides(mouseX, mouseY, mouseX, mouseY)) {
-                if(Prestige.clientPlayerData.hasReward(getReward()) && getReward().getSellPrice() >= 0) {
-                    boolean valid = true;
-                    for(Reward child : getReward().getChildren()) {
-                        if(Prestige.clientPlayerData.hasReward(child)) {
-                            valid = false;
-                        }
-                    }
-                    if(valid) {
-                        parent.getRewardsToSell().add(this);
-                        parent.getRewardsToGive().remove(this);
-                        Prestige.NETWORK.sendToServer(new PacketAttemptSell(getReward()));
-                        setPurchased(false);
-                    }
-                }
-            }
+//        } else if(mouseButton == 1) {
+//            if(collides(mouseX, mouseY, mouseX, mouseY)) {
+//                if(Prestige.clientPlayerData.hasReward(getReward()) && getReward().getSellPrice() >= 0) {
+//                    boolean valid = true;
+//                    for(Reward child : getReward().getChildren()) {
+//                        if(Prestige.clientPlayerData.hasReward(child)) {
+//                            valid = false;
+//                        }
+//                    }
+//                    if(valid) {
+//                        parent.getRewardsToSell().add(this);
+//                        parent.getRewardsToGive().remove(this);
+//                        Prestige.NETWORK.sendToServer(new PacketAttemptSell(getReward()));
+//                        setPurchased(false);
+//                    }
+//                }
+//            }
         }
     }
     

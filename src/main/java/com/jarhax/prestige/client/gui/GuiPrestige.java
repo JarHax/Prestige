@@ -396,6 +396,11 @@ public class GuiPrestige extends GuiPrestigeBase {
             Prestige.clientPlayerData.setLastRespec(System.nanoTime());
             Prestige.clientPlayerData.addPrestige(sells);
             getRewardsToGive().clear();
+            for(GuiObjectReward value : guiObjects.values()) {
+                if(value.isPurchased()) {
+                    getRewardsToSell().add(value);
+                }
+            }
             Prestige.clientPlayerData.getUnlockedRewards().clear();
             Prestige.NETWORK.sendToServer(new PacketRespec());
             Minecraft.getMinecraft().displayGuiScreen(new GuiPrestige());
