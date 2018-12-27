@@ -1,5 +1,6 @@
 package com.jarhax.prestige.config;
 
+import com.jarhax.prestige.Prestige;
 import net.minecraftforge.common.config.Configuration;
 
 import java.io.File;
@@ -12,6 +13,8 @@ public class Config {
     
     public static boolean newWorldMode;
     
+    public static String prestigeButtonText;
+    
     public static Configuration config;
     
     public static void init(File file) {
@@ -21,6 +24,8 @@ public class Config {
         purchasedColour = config.get("Colours", "Purchased Colour", purchasedColour).getInt();
         purchaseableColour = config.get("Colours", "Purchasable Colour", purchaseableColour).getInt();
         newWorldMode = config.getBoolean("NewWorldMode", "Gameplay", false, "Prestige window on a new world");
+        prestigeButtonText = config.getString("PrestigeButtonText", "Gameplay", "Enable or Disable prestige for a specific world", "What text to show when hovering over the prestige button");
+        Prestige.prestigeEnabled = config.getBoolean("Prestige Enabled Default", "Gameplay", true, "What is the default value for prestige?");
         config.save();
     }
     

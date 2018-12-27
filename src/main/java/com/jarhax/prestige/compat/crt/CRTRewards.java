@@ -63,7 +63,7 @@ public class CRTRewards {
             
             @Override
             public String describe() {
-                return "Adding reward: " + name + ".";
+                return "Adding command sell: " + name + ".";
             }
         });
         
@@ -84,7 +84,79 @@ public class CRTRewards {
             
             @Override
             public String describe() {
-                return "Adding reward: " + name + ".";
+                return "Adding command reward: " + name + ".";
+            }
+        });
+        
+    }
+    
+    
+    @ZenMethod
+    public static void registerDisabledAction(IDisabledAction reward) {
+        CraftTweakerAPI.apply(new IAction() {
+            @Override
+            public void apply() {
+                Prestige.DISABLED_ACTIONS.add(reward);
+            }
+            
+            @Override
+            public String describe() {
+                return "Adding disabled action.";
+            }
+        });
+        
+    }
+    
+    @ZenMethod
+    public static void registerDisabledCommand(String command) {
+        CraftTweakerAPI.apply(new IAction() {
+            @Override
+            public void apply() {
+                Prestige.DISABLED_ACTIONS.add((world, player) -> {
+                    EntityPlayer pl = (EntityPlayer) player.getInternal();
+                    pl.getServer().getCommandManager().executeCommand(pl.getServer(), command.replace("@p", pl.getDisplayNameString()));
+                });
+            }
+            
+            @Override
+            public String describe() {
+                return "Adding disabled command.";
+            }
+        });
+        
+    }
+    
+    
+    @ZenMethod
+    public static void registerEnabledAction(IEnabledAction reward) {
+        CraftTweakerAPI.apply(new IAction() {
+            @Override
+            public void apply() {
+                Prestige.ENABLED_ACTIONS.add(reward);
+            }
+            
+            @Override
+            public String describe() {
+                return "Adding enabled action.";
+            }
+        });
+        
+    }
+    
+    @ZenMethod
+    public static void registerEnabledCommand(String command) {
+        CraftTweakerAPI.apply(new IAction() {
+            @Override
+            public void apply() {
+                Prestige.ENABLED_ACTIONS.add((world, player) -> {
+                    EntityPlayer pl = (EntityPlayer) player.getInternal();
+                    pl.getServer().getCommandManager().executeCommand(pl.getServer(), command.replace("@p", pl.getDisplayNameString()));
+                });
+            }
+            
+            @Override
+            public String describe() {
+                return "Adding enabled command.";
             }
         });
         

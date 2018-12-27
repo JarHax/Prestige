@@ -27,23 +27,31 @@ public class CommonEventHandler {
         } else {
             data = tag.getCompoundTag(EntityPlayer.PERSISTED_NBT_TAG);
         }
+        if(!data.hasKey("prestigeEnabled"))
+            data.setBoolean("prestigeEnabled", Prestige.prestigeEnabled);
         
-        if(Config.newWorldMode)
-            if(!data.getBoolean("shownMenu")) {
-                Prestige.NETWORK.sendTo(new PacketOpenPrestigeGUI(), (EntityPlayerMP) event.player);
-                data.setBoolean("shownMenu", true);
+        if(data.getBoolean("prestigeEnabled")) {
+            if(Config.newWorldMode)
+                if(!data.getBoolean("shownMenu")) {
+                    Prestige.NETWORK.sendTo(new PacketOpenPrestigeGUI(), (EntityPlayerMP) event.player);
+                    data.setBoolean("shownMenu", true);
+                }
+            Prestige.ENABLED_ACTIONS.forEach(enabledAction -> enabledAction.process(CraftTweakerMC.getIWorld(event.player.world), CraftTweakerMC.getIPlayer(event.player)));
+            
+            PlayerData playerData = GlobalPrestigeData.getPlayerData(event.player);
+            for(Reward reward : playerData.getUnlockedRewards()) {
+                if(data.hasKey(reward.getIdentifier())) {
+                    continue;
+                }
+                List<IReward> list = Prestige.REWARDS.getOrDefault(reward.getIdentifier(), new ArrayList<>());
+                for(IReward iReward : list) {
+                    iReward.process(CraftTweakerMC.getIWorld(event.player.world), CraftTweakerMC.getIPlayer(event.player));
+                }
+                data.setBoolean(reward.getIdentifier(), true);
             }
-        
-        PlayerData playerData = GlobalPrestigeData.getPlayerData(event.player);
-        for(Reward reward : playerData.getUnlockedRewards()) {
-            if(data.hasKey(reward.getIdentifier())) {
-                continue;
-            }
-            List<IReward> list = Prestige.REWARDS.getOrDefault(reward.getIdentifier(), new ArrayList<>());
-            for(IReward iReward : list) {
-                iReward.process(CraftTweakerMC.getIWorld(event.player.world), CraftTweakerMC.getIPlayer(event.player));
-            }
-            data.setBoolean(reward.getIdentifier(), true);
+            
+        } else {
+            Prestige.DISABLED_ACTIONS.forEach(iDisabledAction -> iDisabledAction.process(CraftTweakerMC.getIWorld(event.player.world), CraftTweakerMC.getIPlayer(event.player)));
         }
         tag.setTag(EntityPlayer.PERSISTED_NBT_TAG, data);
     }

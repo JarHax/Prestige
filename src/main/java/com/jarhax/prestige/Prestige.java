@@ -33,6 +33,10 @@ public class Prestige {
     
     public static final HashMap<String, List<IReward>> REWARDS = new HashMap<>();
     public static final HashMap<String, List<ISellAction>> SELL_ACTIONS = new HashMap<>();
+    public static final List<IDisabledAction> DISABLED_ACTIONS = new ArrayList<>();
+    public static final List<IEnabledAction> ENABLED_ACTIONS = new ArrayList<>();
+    
+    
     
     @SideOnly(Side.CLIENT)
     public static PlayerData clientPlayerData;
@@ -41,6 +45,7 @@ public class Prestige {
     
     @Instance("prestige")
     public static Prestige INSTANCE;
+    public static boolean prestigeEnabled = true;
     
     @EventHandler
     public void onPreInit(FMLPreInitializationEvent event) {
@@ -53,11 +58,15 @@ public class Prestige {
         NETWORK.register(PacketSellRewards.class, Side.SERVER);
         NETWORK.register(PacketRespec.class, Side.SERVER);
         NETWORK.register(PacketAttemptSell.class, Side.SERVER);
+        NETWORK.register(PacketSendPrestigeOpenCommand.class, Side.SERVER);
         
         BookshelfRegistry.addCommand(new CommandPrestige());
         JSON_FILE = new File(new File(event.getModConfigurationDirectory(), "prestige"), "rewards.json");
         MinecraftForge.EVENT_BUS.register(new CommonEventHandler());
     }
+    
+    
+    
     
     @EventHandler
     @SideOnly(Side.CLIENT)
