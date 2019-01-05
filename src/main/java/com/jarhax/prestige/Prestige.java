@@ -4,6 +4,7 @@ import com.google.gson.*;
 import com.jarhax.prestige.api.Reward;
 import com.jarhax.prestige.command.CommandPrestige;
 import com.jarhax.prestige.compat.crt.*;
+import com.jarhax.prestige.compat.loot.LootConditionPrestige;
 import com.jarhax.prestige.config.Config;
 import com.jarhax.prestige.data.*;
 import com.jarhax.prestige.events.*;
@@ -11,6 +12,7 @@ import com.jarhax.prestige.packet.*;
 import net.darkhax.bookshelf.BookshelfRegistry;
 import net.darkhax.bookshelf.network.NetworkHandler;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.world.storage.loot.conditions.LootConditionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.*;
@@ -37,15 +39,16 @@ public class Prestige {
     public static final List<IEnabledAction> ENABLED_ACTIONS = new ArrayList<>();
     
     
-    
     @SideOnly(Side.CLIENT)
     public static PlayerData clientPlayerData;
+    
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().excludeFieldsWithoutExposeAnnotation().create();
     public static File JSON_FILE;
     
     @Instance("prestige")
     public static Prestige INSTANCE;
     public static boolean prestigeEnabled = true;
+    
     
     @EventHandler
     public void onPreInit(FMLPreInitializationEvent event) {
@@ -63,9 +66,8 @@ public class Prestige {
         BookshelfRegistry.addCommand(new CommandPrestige());
         JSON_FILE = new File(new File(event.getModConfigurationDirectory(), "prestige"), "rewards.json");
         MinecraftForge.EVENT_BUS.register(new CommonEventHandler());
+        LootConditionManager.registerCondition(new LootConditionPrestige.Serializer());
     }
-    
-    
     
     
     @EventHandler
