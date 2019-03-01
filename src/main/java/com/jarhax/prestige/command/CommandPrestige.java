@@ -14,6 +14,7 @@ public class CommandPrestige extends CommandTree {
         this.addSubcommand(new CommandSync());
         this.addSubcommand(new CommandEdit());
         this.addSubcommand(new CommandClear());
+        this.addSubcommand(new CommandForcePrestige());
     
     
     }
