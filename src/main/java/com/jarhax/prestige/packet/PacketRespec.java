@@ -1,10 +1,8 @@
 package com.jarhax.prestige.packet;
 
-import com.jarhax.prestige.Prestige;
 import com.jarhax.prestige.api.Reward;
 import com.jarhax.prestige.data.*;
 import net.darkhax.bookshelf.network.SerializableMessage;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.common.network.simpleimpl.*;
@@ -25,7 +23,6 @@ public class PacketRespec extends SerializableMessage {
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
     public IMessage handleMessage (MessageContext context) {
 
         // Move logic off the packet thread
