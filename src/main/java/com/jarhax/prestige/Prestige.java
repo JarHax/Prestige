@@ -37,7 +37,7 @@ public class Prestige {
     public static final HashMap<String, List<ISellAction>> SELL_ACTIONS = new HashMap<>();
     public static final List<IDisabledAction> DISABLED_ACTIONS = new ArrayList<>();
     public static final List<IEnabledAction> ENABLED_ACTIONS = new ArrayList<>();
-    
+    public static final HashMap<String, List<IRewardCondition>> REWARD_CONDITIONS = new HashMap<>();
     
     @SideOnly(Side.CLIENT)
     public static PlayerData clientPlayerData;

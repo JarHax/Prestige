@@ -161,4 +161,24 @@ public class CRTRewards {
         });
         
     }
+    
+    
+    
+    @ZenMethod
+    public static void registerRewardCondition(String name, IRewardCondition condition){
+        CraftTweakerAPI.apply(new IAction() {
+            @Override
+            public void apply() {
+                List<IRewardCondition> list = Prestige.REWARD_CONDITIONS.getOrDefault(name, new LinkedList<>());
+                list.add(condition);
+                Prestige.REWARD_CONDITIONS.put(name, list);
+            }
+        
+            @Override
+            public String describe() {
+                return "Adding reward condition for: " + name + ".";
+            }
+        });
+    
+    }
 }

@@ -4,8 +4,11 @@ import com.jarhax.prestige.Prestige;
 import com.jarhax.prestige.api.Reward;
 import com.jarhax.prestige.client.gui.GuiPrestigeBase;
 import com.jarhax.prestige.client.utils.RenderUtils;
+import com.jarhax.prestige.compat.crt.IRewardCondition;
 import com.jarhax.prestige.config.Config;
 import com.jarhax.prestige.packet.*;
+import crafttweaker.api.minecraft.CraftTweakerMC;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -18,6 +21,7 @@ public class GuiObjectReward extends GuiObject {
     private static final ResourceLocation BACKGROUND = new ResourceLocation("prestige", "textures/gui/gui_prestige_icons.png");
     private final Reward reward;
     private boolean purchased;
+    private boolean purchasable;
     private ItemStack renderStack;
     
     public GuiObjectReward(GuiPrestigeBase parent, int x, int y, int width, int height, Reward reward) {
@@ -25,6 +29,14 @@ public class GuiObjectReward extends GuiObject {
         super(parent, x, y, width, height);
         this.reward = reward;
         this.renderStack = reward.getIcon();
+        List<IRewardCondition> conditions = Prestige.REWARD_CONDITIONS.getOrDefault(reward.getIdentifier(), new ArrayList<>());
+        boolean valid = true;
+        for(IRewardCondition condition : conditions) {
+            if(!condition.process(CraftTweakerMC.getIWorld(mc.world), CraftTweakerMC.getIPlayer(mc.player))){
+                valid = false;
+            }
+        }
+        setPurchasable(valid);
     }
     
     public GuiObjectReward(GuiPrestigeBase parent, Reward reward) {
@@ -32,12 +44,28 @@ public class GuiObjectReward extends GuiObject {
         super(parent, reward.getX(), reward.getY(), 32, 32);
         this.reward = reward;
         this.renderStack = reward.getIcon();
+        List<IRewardCondition> conditions = Prestige.REWARD_CONDITIONS.getOrDefault(reward.getIdentifier(), new ArrayList<>());
+        boolean valid = true;
+        for(IRewardCondition condition : conditions) {
+            if(!condition.process(CraftTweakerMC.getIWorld(mc.world), CraftTweakerMC.getIPlayer(mc.player))){
+                valid = false;
+            }
+        }
+        setPurchasable(valid);
     }
     
     @Override
     public void update() {
         
         super.update();
+        List<IRewardCondition> conditions = Prestige.REWARD_CONDITIONS.getOrDefault(reward.getIdentifier(), new ArrayList<>());
+        boolean valid = true;
+        for(IRewardCondition condition : conditions) {
+            if(!condition.process(CraftTweakerMC.getIWorld(mc.world), CraftTweakerMC.getIPlayer(mc.player))){
+                valid = false;
+            }
+        }
+        setPurchasable(valid);
     }
     
     @Override
@@ -47,7 +75,7 @@ public class GuiObjectReward extends GuiObject {
         if(isPurchased()) {
             float[] argb = Config.getARGB(Config.purchasedColour);
             GlStateManager.color(argb[1], argb[2], argb[3]);
-        } else if(!Prestige.clientPlayerData.canPurchase(getReward())) {
+        } else if(!Prestige.clientPlayerData.canPurchase(getReward()) || !isPurchasable()) {
             float[] argb = Config.getARGB(Config.unavailableColour);
             GlStateManager.color(argb[1], argb[2], argb[3]);
         } else {
@@ -109,7 +137,7 @@ public class GuiObjectReward extends GuiObject {
         super.mouseClicked(mouseX, mouseY, mouseButton);
         if(mouseButton == 0) {
             if(collides(mouseX, mouseY, mouseX, mouseY)) {
-                if(Prestige.clientPlayerData.canPurchase(getReward())) {
+                if(Prestige.clientPlayerData.canPurchase(getReward()) && isPurchasable()) {
                     setPurchased(true);
                     parent.getRewardsToGive().add(this);
                     parent.getRewardsToSell().remove(this);
@@ -169,4 +197,14 @@ public class GuiObjectReward extends GuiObject {
     public void setPurchased(boolean purchased) {
         this.purchased = purchased;
     }
+    
+    
+    public boolean isPurchasable() {
+        return purchasable;
+    }
+    
+    public void setPurchasable(boolean purchasable) {
+        this.purchasable = purchasable;
+    }
+    
 }
