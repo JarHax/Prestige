@@ -36,7 +36,7 @@ public class GuiObjectBackGround extends GuiObject {
             data.put("offsetX", this.offsetX);
             data.put("offsetY", this.offsetY);
     
-            ShaderHandler.useShader(ShaderHandler.create("/assets/prestige/shaders/star"), data);
+            ShaderHandler.useShader(ShaderHandler.STAR, data);
             GlStateManager.pushMatrix();
             this.mc.getTextureManager().bindTexture(BACKGROUND);
             RenderUtils.drawTexturedModalRect(this.getX() + 2, this.getY() + 2, this.offsetX, this.offsetY, this.getWidth() - 4, this.getHeight() - 4);
