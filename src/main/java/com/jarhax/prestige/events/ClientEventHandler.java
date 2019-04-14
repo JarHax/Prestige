@@ -13,13 +13,51 @@ import net.minecraftforge.client.settings.*;
 import net.minecraftforge.fml.client.config.GuiUtils;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent;
+import net.minecraftforge.fml.common.gameevent.*;
 import net.minecraftforge.fml.relauncher.*;
 import org.lwjgl.input.Keyboard;
 
 import java.util.Arrays;
 
 public class ClientEventHandler {
+    
+    
+    public static int gameTicks = 0;
+    public static float partialTicks = 0;
+    public static float deltaTime = 0;
+    public static float totalTime = 0;
+    
+    private void calcDelta() {
+        float oldTotal = totalTime;
+        totalTime = gameTicks + partialTicks;
+        deltaTime = totalTime - oldTotal;
+    }
+    
+    @SubscribeEvent
+    public void onTickRenderTick(TickEvent.RenderTickEvent event) {
+        if(event.phase == TickEvent.Phase.START) {
+            partialTicks = event.renderTickTime;
+        } else {
+            calcDelta();
+        }
+        
+    }
+    
+    @SubscribeEvent
+    public void clientTickEnd(TickEvent.ClientTickEvent event) {
+        
+        if(event.phase == TickEvent.Phase.END) {
+            Minecraft mc = Minecraft.getMinecraft();
+            
+            GuiScreen gui = mc.currentScreen;
+            if(gui == null || !gui.doesGuiPauseGame()) {
+                gameTicks++;
+                partialTicks = 0;
+            }
+            calcDelta();
+        }
+    }
+    
     
     public static KeyBinding open;
     

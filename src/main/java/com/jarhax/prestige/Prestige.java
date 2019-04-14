@@ -2,6 +2,7 @@ package com.jarhax.prestige;
 
 import com.google.gson.*;
 import com.jarhax.prestige.api.Reward;
+import com.jarhax.prestige.client.ShaderHandler;
 import com.jarhax.prestige.command.CommandPrestige;
 import com.jarhax.prestige.compat.crt.*;
 import com.jarhax.prestige.compat.loot.LootConditionPrestige;
@@ -78,7 +79,6 @@ public class Prestige {
     @SideOnly(Side.CLIENT)
     public void onPreInitClient(FMLPreInitializationEvent event) {
         ClientEventHandler.initKeys();
-        
         MinecraftForge.EVENT_BUS.register(new ClientEventHandler());
     }
     
@@ -86,6 +86,13 @@ public class Prestige {
     public void onFMLInitialization(FMLInitializationEvent event) {
         loadRewards();
     }
+    
+    @EventHandler
+    @SideOnly(Side.CLIENT)
+    public void onFMLInitializationClient(FMLInitializationEvent event) {
+        ShaderHandler.registerShaders();
+    }
+    
     
     public void saveRewards() {
         

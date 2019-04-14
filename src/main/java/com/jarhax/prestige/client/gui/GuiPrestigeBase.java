@@ -73,4 +73,9 @@ public class GuiPrestigeBase extends GuiScreen {
     public void setRewardsToSell(LinkedList<GuiObjectReward> rewardsToSell) {
         this.rewardsToSell = rewardsToSell;
     }
+    
+    @Override
+    public boolean doesGuiPauseGame() {
+        return false;
+    }
 }
