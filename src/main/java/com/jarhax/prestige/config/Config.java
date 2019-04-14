@@ -16,7 +16,7 @@ public class Config {
     public static boolean newWorldMode;
     
     public static String prestigeButtonText;
-    
+    public static int shaderIndex = 0;
     public static Configuration config;
     
     public static void init(File file) {
@@ -29,6 +29,8 @@ public class Config {
         prestigeButtonText = config.getString("PrestigeButtonText", "Gameplay", "Enable or Disable prestige for a specific world", "What text to show when hovering over the prestige button");
         Prestige.prestigeEnabled = config.getBoolean("Prestige Enabled Default", "Gameplay", true, "What is the default value for prestige?");
         respecCooldown = config.get("Respec", "Respec Cooldown", respecCooldown).getInt();
+        shaderIndex = config.get("Shaders", "Shader Index", shaderIndex).getInt();
+        
         config.save();
     }
     
@@ -50,7 +52,7 @@ public class Config {
     
     
     public static float[] getARGB(int hex) {
-        return new float[]{getAlpha(hex), getRed(hex), getGreen(hex), getBlue(hex)};
+        return new float[] {getAlpha(hex), getRed(hex), getGreen(hex), getBlue(hex)};
     }
     
 }

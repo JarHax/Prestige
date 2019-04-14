@@ -29,7 +29,7 @@ void main() {
     vec2 i_st = floor(st);
     vec2 f_st = fract(st);
 
-    float m_dist = 0.5;
+    float m_dist = 1;
 
     for (int y= -1; y <= 1; y++) {
         for (int x= -1; x <= 1; x++) {
@@ -39,7 +39,7 @@ void main() {
 
             point = 0.5*sin(time/15. + 32*point);
 
-            vec2 diff = neighbor + point - f_st;
+            vec2 diff = neighbor + point;
 
             float dist = length(diff);
 

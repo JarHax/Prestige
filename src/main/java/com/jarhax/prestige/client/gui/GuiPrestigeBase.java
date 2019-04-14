@@ -23,6 +23,7 @@ public class GuiPrestigeBase extends GuiScreen {
     protected LinkedList<GuiObjectReward> rewardsToGive;
     protected LinkedList<GuiObjectReward> rewardsToSell;
     
+    
     public Map<String, GuiObjectReward> getGuiObjects() {
         return guiObjects;
     }
@@ -78,4 +79,5 @@ public class GuiPrestigeBase extends GuiScreen {
     public boolean doesGuiPauseGame() {
         return false;
     }
+    
 }

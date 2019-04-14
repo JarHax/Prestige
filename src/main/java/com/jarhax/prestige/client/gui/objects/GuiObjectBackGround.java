@@ -4,6 +4,7 @@ import com.jarhax.prestige.client.ShaderHandler;
 import com.jarhax.prestige.client.gui.*;
 import com.jarhax.prestige.client.utils.RenderUtils;
 
+import com.jarhax.prestige.config.Config;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
@@ -35,27 +36,26 @@ public class GuiObjectBackGround extends GuiObject {
             HashMap<String, Object> data = new HashMap<>();
             data.put("offsetX", this.offsetX);
             data.put("offsetY", this.offsetY);
-    
-            ShaderHandler.useShader(ShaderHandler.STAR, data);
+            ShaderHandler.useShader(ShaderHandler.SHADERS.get((Config.shaderIndex) % (ShaderHandler.SHADERS.size())), data);
             GlStateManager.pushMatrix();
             this.mc.getTextureManager().bindTexture(BACKGROUND);
             RenderUtils.drawTexturedModalRect(this.getX() + 2, this.getY() + 2, this.offsetX, this.offsetY, this.getWidth() - 4, this.getHeight() - 4);
             GlStateManager.popMatrix();
             ShaderHandler.releaseShader();
             
-            //            GlStateManager.pushMatrix();
-            //            GlStateManager.scale(2, 2, 2);
-            //            this.mc.getTextureManager().bindTexture(BACKGROUND_ALT);
-            //            GlStateManager.enableBlend();
-            //            GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR);
-            //            GlStateManager.enableAlpha();
-            //            GlStateManager.color(1,1,1,RenderUtils.remap((float) Math.sin((System.nanoTime() / 1000000000.0/2)), -1, 1, 0.4f, 0.75f));
-            //            RenderUtils.drawTexturedModalRect((this.getX() + 2) / 2, (this.getY() + 2) / 2, this.offsetAltX, this.offsetAltY, (this.getWidth() - 2) / 2, (this.getHeight() - 2) / 2);
-            //            GlStateManager.disableBlend();
-            //
-            //            GlStateManager.scale(1, 1, 1);
-            //            GlStateManager.popMatrix();
-            
+            if(Config.shaderIndex == 0) {
+                GlStateManager.pushMatrix();
+                GlStateManager.scale(2, 2, 2);
+                this.mc.getTextureManager().bindTexture(BACKGROUND_ALT);
+                GlStateManager.enableBlend();
+                GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR);
+                GlStateManager.enableAlpha();
+                GlStateManager.color(1, 1, 1, RenderUtils.remap((float) Math.sin((System.nanoTime() / 1000000000.0 / 2)), -1, 1, 0.4f, 0.75f));
+                RenderUtils.drawTexturedModalRect((this.getX() + 2) / 2, (this.getY() + 2) / 2, this.offsetAltX, this.offsetAltY, (this.getWidth() - 2) / 2f, (this.getHeight() - 2) / 2f);
+                GlStateManager.disableBlend();
+                GlStateManager.scale(1, 1, 1);
+                GlStateManager.popMatrix();
+            }
         }
     }
     

@@ -14,13 +14,29 @@ public class ShaderHandler {
     
     public static final int VERT = ARBVertexShader.GL_VERTEX_SHADER_ARB;
     public static final int FRAG = ARBFragmentShader.GL_FRAGMENT_SHADER_ARB;
+    public static int SCREEN;
     public static int STAR;
+    public static int RECTS;
+    public static int SQUIGGLE_STAR;
+    public static int FBM;
+    public static int MAZE;
+    public static int LAVA_LAMP;
+    public static int WAVES;
     
-    public static final Set<Integer> SHADERS = new HashSet<>();
+    
+    public static final List<Integer> SHADERS = new ArrayList<>();
     
     public static void registerShaders() {
         try {
+            SCREEN = create("/assets/prestige/shaders/screen");
             STAR = create("/assets/prestige/shaders/star");
+            RECTS = create("/assets/prestige/shaders/rects");
+            SQUIGGLE_STAR = create("/assets/prestige/shaders/squigglestar");
+            FBM = create("/assets/prestige/shaders/fbm");
+            MAZE = create("/assets/prestige/shaders/maze");
+            LAVA_LAMP = create("/assets/prestige/shaders/lava_lamp");
+            WAVES = create("/assets/prestige/shaders/waves");
+    
         } catch(Exception e) {
             e.printStackTrace();
         }

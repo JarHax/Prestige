@@ -2,6 +2,7 @@ package com.jarhax.prestige.client.gui;
 
 import com.jarhax.prestige.Prestige;
 import com.jarhax.prestige.api.Reward;
+import com.jarhax.prestige.client.ShaderHandler;
 import com.jarhax.prestige.client.gui.objects.*;
 import com.jarhax.prestige.client.utils.RenderUtils;
 import com.jarhax.prestige.config.Config;
@@ -91,6 +92,7 @@ public class GuiPrestige extends GuiPrestigeBase {
         buttonList.add(respecBtn);
         buttonList.add(confirmBtn);
         buttonList.add(cancelBtn);
+        buttonList.add(new GuiButtonExt(-1, guiWidth - 96, top + 4, 100, fontRenderer.FONT_HEIGHT + 2, "Switch Background"));
         confirmBtn.visible = false;
         cancelBtn.visible = false;
     }
@@ -375,7 +377,10 @@ public class GuiPrestige extends GuiPrestigeBase {
     @Override
     protected void actionPerformed(GuiButton button) throws IOException {
         super.actionPerformed(button);
-        if(button.id == 0) {
+        if(button.id == -1) {
+            Config.shaderIndex = (Config.shaderIndex + 1) % (ShaderHandler.SHADERS.size());//ShaderHandler.SHADERS.get(this.shader+1 )
+            Config.config.save();
+        } else if(button.id == 0) {
             respec = true;
             respecBtn.visible = false;
             confirmBtn.visible = true;
