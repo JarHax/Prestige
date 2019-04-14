@@ -11,6 +11,8 @@ public class Config {
     public static int purchasedColour = 0x00cccc;
     public static int purchaseableColour = 0xFFFFFF;
     
+    public static int respecCooldown = 300;
+    
     public static boolean newWorldMode;
     
     public static String prestigeButtonText;
@@ -26,6 +28,7 @@ public class Config {
         newWorldMode = config.getBoolean("NewWorldMode", "Gameplay", false, "Prestige window on a new world");
         prestigeButtonText = config.getString("PrestigeButtonText", "Gameplay", "Enable or Disable prestige for a specific world", "What text to show when hovering over the prestige button");
         Prestige.prestigeEnabled = config.getBoolean("Prestige Enabled Default", "Gameplay", true, "What is the default value for prestige?");
+        respecCooldown = config.get("Respec", "Respec Cooldown", respecCooldown).getInt();
         config.save();
     }
     

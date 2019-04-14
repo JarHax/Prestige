@@ -24,7 +24,7 @@ public class ClientEventHandler {
     public static KeyBinding open;
     
     public static void initKeys() {
-        open = new KeyBinding("prestige.key.open", KeyConflictContext.UNIVERSAL, KeyModifier.ALT, Keyboard.KEY_F4, "prestige.key.category");
+        open = new KeyBinding("prestige.key.open", KeyConflictContext.UNIVERSAL, KeyModifier.NONE, Keyboard.KEY_P, "prestige.key.category");
         ClientRegistry.registerKeyBinding(open);
     }
     

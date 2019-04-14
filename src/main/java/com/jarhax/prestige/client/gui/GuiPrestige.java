@@ -4,6 +4,7 @@ import com.jarhax.prestige.Prestige;
 import com.jarhax.prestige.api.Reward;
 import com.jarhax.prestige.client.gui.objects.*;
 import com.jarhax.prestige.client.utils.RenderUtils;
+import com.jarhax.prestige.config.Config;
 import com.jarhax.prestige.packet.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.*;
@@ -139,14 +140,12 @@ public class GuiPrestige extends GuiPrestigeBase {
             confirmBtn.enabled = false;
         }
         
-        //        long lastRespecSec = (long) (lastRespec/1e+9);
-        //        System.out.println(lastRespecSec + ":" + ((long)(System.nanoTime()/1e+9)));
-        long l = TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - Prestige.clientPlayerData.getLastRespec());
-        int time = 5 * 60;
+        long l = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - Prestige.clientPlayerData.getLastRespec());
+        int time = Config.respecCooldown;
         if(l <= time) {
             confirmBtn.enabled = false;
             respecBtn.enabled = false;
-            respecBtn.displayString = "" + (time - TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - Prestige.clientPlayerData.getLastRespec()));
+            respecBtn.displayString = "" + (time - TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - Prestige.clientPlayerData.getLastRespec()));
         } else {
             confirmBtn.enabled = true;
             respecBtn.enabled = true;
@@ -393,7 +392,8 @@ public class GuiPrestige extends GuiPrestigeBase {
             }
             long ceil = (long) Math.ceil((Prestige.clientPlayerData.getPrestige() + sells) / 10f);
             sells -= ceil;
-            Prestige.clientPlayerData.setLastRespec(System.nanoTime());
+            long currentTime = System.currentTimeMillis();
+            Prestige.clientPlayerData.setLastRespec(currentTime);
             Prestige.clientPlayerData.addPrestige(sells);
             getRewardsToGive().clear();
             for(GuiObjectReward value : guiObjects.values()) {
@@ -402,7 +402,7 @@ public class GuiPrestige extends GuiPrestigeBase {
                 }
             }
             Prestige.clientPlayerData.getUnlockedRewards().clear();
-            Prestige.NETWORK.sendToServer(new PacketRespec());
+            Prestige.NETWORK.sendToServer(new PacketRespec(currentTime));
             Minecraft.getMinecraft().displayGuiScreen(new GuiPrestige());
         } else if(button.id == 2) {
             respec = false;
