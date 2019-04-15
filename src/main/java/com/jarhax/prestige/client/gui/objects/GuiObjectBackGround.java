@@ -33,15 +33,19 @@ public class GuiObjectBackGround extends GuiObject {
     public void draw(int left, int top, int mouseX, int mouseY, float partialTicks) {
         
         if(this.visible) {
-            HashMap<String, Object> data = new HashMap<>();
-            data.put("offsetX", this.offsetX);
-            data.put("offsetY", this.offsetY);
-            ShaderHandler.useShader(ShaderHandler.SHADERS.get((Config.shaderIndex) % (ShaderHandler.SHADERS.size())), data);
+            if(ShaderHandler.SHADERS.size() > 0) {
+                HashMap<String, Object> data = new HashMap<>();
+                data.put("offsetX", this.offsetX);
+                data.put("offsetY", this.offsetY);
+                ShaderHandler.useShader(ShaderHandler.SHADERS.get((Config.shaderIndex) % (ShaderHandler.SHADERS.size())), data);
+            }
             GlStateManager.pushMatrix();
             this.mc.getTextureManager().bindTexture(BACKGROUND);
             RenderUtils.drawTexturedModalRect(this.getX() + 2, this.getY() + 2, this.offsetX, this.offsetY, this.getWidth() - 4, this.getHeight() - 4);
             GlStateManager.popMatrix();
-            ShaderHandler.releaseShader();
+            if(ShaderHandler.SHADERS.size() > 0) {
+                ShaderHandler.releaseShader();
+            }
             
             if(Config.shaderIndex == 0) {
                 GlStateManager.pushMatrix();
