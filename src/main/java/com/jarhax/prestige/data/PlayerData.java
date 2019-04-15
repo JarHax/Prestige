@@ -15,13 +15,13 @@ public class PlayerData {
     private static final String TAG_CONFIRMED = "Prestige";
     private static final String TAG_UNLOCKED = "Unlocked";
     private static final String TAG_SOURCES = "Sources";
-    private static final String TAG_LAST_RESPEC = "LastRespec";
+    private static final String TAG_LAST_RESPEC = "respecTimer";
     
     private UUID playerId;
     private long prestige;
     private final Set<Reward> unlockedRewards;
     private final Set<String> sources;
-    private long lastRespec;
+    private long respTimer;
     
     public PlayerData(EntityPlayer player) {
         
@@ -34,7 +34,7 @@ public class PlayerData {
         this.prestige = 0;
         this.unlockedRewards = new HashSet<>();
         this.sources = new HashSet<>();
-        this.lastRespec = 0;
+        this.respTimer = 0;
     }
     
     public PlayerData(NBTTagCompound tag) {
@@ -43,7 +43,7 @@ public class PlayerData {
         this.prestige = tag.getLong(TAG_CONFIRMED);
         this.unlockedRewards = (Set<Reward>) NBTUtils.readCollection(new HashSet<Reward>(), tag.getTagList(TAG_UNLOCKED, NBT.TAG_STRING), Prestige.REGISTRY::get);
         this.sources = (Set<String>) NBTUtils.readCollection(new HashSet<String>(), tag.getTagList(TAG_SOURCES, NBT.TAG_STRING), string -> string);
-        this.lastRespec = tag.getLong(TAG_LAST_RESPEC);
+        this.respTimer = tag.getLong(TAG_LAST_RESPEC);
     }
     
     public NBTTagCompound save() {
@@ -63,7 +63,7 @@ public class PlayerData {
         }
         tag.setTag(TAG_UNLOCKED, tagList);
         tag.setTag(TAG_SOURCES, NBTUtils.writeCollection(this.sources, string -> string));
-        tag.setLong(TAG_LAST_RESPEC, this.lastRespec);
+        tag.setLong(TAG_LAST_RESPEC, this.respTimer);
         return tag;
     }
     
@@ -162,11 +162,11 @@ public class PlayerData {
     }
     
     
-    public long getLastRespec() {
-        return lastRespec;
+    public long getRespTimer() {
+        return respTimer;
     }
     
-    public void setLastRespec(long lastRespec) {
-        this.lastRespec = lastRespec;
+    public void setRespTimer(long respTimer) {
+        this.respTimer = respTimer;
     }
 }

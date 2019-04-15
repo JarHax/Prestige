@@ -1,6 +1,7 @@
 package com.jarhax.prestige.packet;
 
 import com.jarhax.prestige.api.Reward;
+import com.jarhax.prestige.config.Config;
 import com.jarhax.prestige.data.*;
 import net.darkhax.bookshelf.network.SerializableMessage;
 import net.minecraft.entity.player.EntityPlayer;
@@ -18,11 +19,6 @@ public class PacketRespec extends SerializableMessage {
         // Empty constructor for forge's system
     }
     
-    
-    public PacketRespec(long time) {
-        
-        this.time = time;
-    }
     
     public PacketRespec(PlayerData data) {
         
@@ -42,11 +38,7 @@ public class PacketRespec extends SerializableMessage {
         }
         data.addPrestige(sells);
         data.getUnlockedRewards().clear();
-        if(time != 0) {
-            data.setLastRespec(System.currentTimeMillis());
-        } else {
-            data.setLastRespec(time);
-        }
+        data.setRespTimer(Config.respecCooldown);
         return null;
     }
 }

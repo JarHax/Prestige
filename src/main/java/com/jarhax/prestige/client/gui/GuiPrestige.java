@@ -142,12 +142,10 @@ public class GuiPrestige extends GuiPrestigeBase {
             confirmBtn.enabled = false;
         }
         
-        long l = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - Prestige.clientPlayerData.getLastRespec());
-        int time = Config.respecCooldown;
-        if(l <= time) {
+        if(Prestige.clientPlayerData.getRespTimer() >= 0) {
             confirmBtn.enabled = false;
             respecBtn.enabled = false;
-            respecBtn.displayString = "" + (time - TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - Prestige.clientPlayerData.getLastRespec()));
+            respecBtn.displayString = Prestige.clientPlayerData.getRespTimer() + "";
         } else {
             confirmBtn.enabled = true;
             respecBtn.enabled = true;
@@ -397,8 +395,8 @@ public class GuiPrestige extends GuiPrestigeBase {
             }
             long ceil = (long) Math.ceil((Prestige.clientPlayerData.getPrestige() + sells) / 10f);
             sells -= ceil;
-            long currentTime = System.currentTimeMillis();
-            Prestige.clientPlayerData.setLastRespec(currentTime);
+            long currentTime = Config.respecCooldown;
+            Prestige.clientPlayerData.setRespTimer(currentTime);
             Prestige.clientPlayerData.addPrestige(sells);
             getRewardsToGive().clear();
             for(GuiObjectReward value : guiObjects.values()) {
@@ -407,7 +405,7 @@ public class GuiPrestige extends GuiPrestigeBase {
                 }
             }
             Prestige.clientPlayerData.getUnlockedRewards().clear();
-            Prestige.NETWORK.sendToServer(new PacketRespec(currentTime));
+            Prestige.NETWORK.sendToServer(new PacketRespec());
             Minecraft.getMinecraft().displayGuiScreen(new GuiPrestige());
         } else if(button.id == 2) {
             respec = false;

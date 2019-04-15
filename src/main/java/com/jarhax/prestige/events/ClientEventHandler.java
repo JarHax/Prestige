@@ -3,7 +3,7 @@ package com.jarhax.prestige.events;
 
 import com.jarhax.prestige.Prestige;
 import com.jarhax.prestige.config.Config;
-import com.jarhax.prestige.packet.PacketSendPrestigeOpenCommand;
+import com.jarhax.prestige.packet.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.renderer.GlStateManager;
@@ -43,6 +43,7 @@ public class ClientEventHandler {
         
     }
     
+    public static int lastGameTick;
     @SubscribeEvent
     public void clientTickEnd(TickEvent.ClientTickEvent event) {
         
@@ -55,6 +56,10 @@ public class ClientEventHandler {
                 partialTicks = 0;
             }
             calcDelta();
+            if(Prestige.clientPlayerData != null && Prestige.clientPlayerData.getRespTimer() >= 0 && totalTime%20==0) {
+                Prestige.clientPlayerData.setRespTimer(Prestige.clientPlayerData.getRespTimer() - 1);
+                lastGameTick = gameTicks;
+            }
         }
     }
     
