@@ -33,7 +33,7 @@ public class CommandForcePrestige extends Command {
     @Override
     public int getRequiredPermissionLevel() {
         
-        return 0;
+        return 2;
     }
     
     @Override
