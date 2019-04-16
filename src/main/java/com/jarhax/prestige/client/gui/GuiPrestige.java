@@ -375,7 +375,7 @@ public class GuiPrestige extends GuiPrestigeBase {
     @Override
     protected void actionPerformed(GuiButton button) throws IOException {
         super.actionPerformed(button);
-        if(button.id == -1) {
+        if(button.id == -1 && ShaderHandler.SHADERS.size() > 0) {
             Config.shaderIndex = (Config.shaderIndex + 1) % (ShaderHandler.SHADERS.size());//ShaderHandler.SHADERS.get(this.shader+1 )
             Config.config.save();
         } else if(button.id == 0) {
