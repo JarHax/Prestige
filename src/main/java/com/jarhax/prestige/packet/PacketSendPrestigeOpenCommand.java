@@ -17,6 +17,10 @@ public class PacketSendPrestigeOpenCommand extends SerializableMessage {
     @Override
     public IMessage handleMessage(MessageContext context) {
         
+        if(context == null || context.getServerHandler() == null || context.getServerHandler().player == null){
+            Prestige.LOG.error("Something has seriously messed up when opening the prestige window!");
+            return null;
+        }
         final EntityPlayerMP player = context.getServerHandler().player;
         
         if(player.getEntityData().getCompoundTag(EntityPlayer.PERSISTED_NBT_TAG).getBoolean("prestigeEnabled")) {
