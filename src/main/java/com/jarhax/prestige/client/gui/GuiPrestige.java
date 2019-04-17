@@ -166,6 +166,9 @@ public class GuiPrestige extends GuiPrestigeBase {
         for(GuiObjectReward parent : guiObjects.values()) {
             Vec3d start = new Vec3d(parent.getX() + parent.getWidth() / 2, parent.getY() + parent.getHeight() / 2, 0);
             for(Reward child : parent.getReward().getChildren()) {
+                if(child == null){
+                    continue;
+                }
                 GuiObjectReward childObject = getObject(child.getIdentifier());
                 if(childObject == null) {
                     continue;
