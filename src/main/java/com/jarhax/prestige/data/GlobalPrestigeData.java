@@ -93,7 +93,7 @@ public class GlobalPrestigeData {
                 return new PlayerData(CompressedStreamTools.read(file));
             }
 
-            catch (final IOException e) {
+            catch (final Exception e) {
 
                 Prestige.LOG.trace("Could not load player data from " + file.getName(), e);
             }
