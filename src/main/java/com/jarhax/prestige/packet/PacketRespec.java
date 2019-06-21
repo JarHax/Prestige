@@ -1,5 +1,6 @@
 package com.jarhax.prestige.packet;
 
+import com.jarhax.prestige.Prestige;
 import com.jarhax.prestige.api.Reward;
 import com.jarhax.prestige.config.Config;
 import com.jarhax.prestige.data.*;
@@ -34,11 +35,13 @@ public class PacketRespec extends SerializableMessage {
             // Move logic off the packet thread
             final EntityPlayer player = context.getServerHandler().player;
             final PlayerData data = GlobalPrestigeData.getPlayerData(player);
-            
-            long sells = data.getPrestige();
+    
+            long sells = 0;
             for(Reward reward : data.getUnlockedRewards()) {
                 sells += reward.getSellPrice();
             }
+            long ceil = (long) Math.ceil((data.getPrestige() + sells) / 10f);
+            sells -= ceil;
             data.addPrestige(sells);
             data.getUnlockedRewards().clear();
             data.setRespTimer(Config.respecCooldown);
