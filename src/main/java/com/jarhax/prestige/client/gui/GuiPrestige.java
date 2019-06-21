@@ -88,8 +88,8 @@ public class GuiPrestige extends GuiPrestigeBase {
         confirmBtn = new GuiButtonExt(1, width / 2 - 55, guiHeight / 2 + (fontRenderer.FONT_HEIGHT + 2) / 2, 50, fontRenderer.FONT_HEIGHT + 2, "Confirm");
         cancelBtn = new GuiButtonExt(2, width / 2 + 5, guiHeight / 2 + (fontRenderer.FONT_HEIGHT + 2) / 2, 50, fontRenderer.FONT_HEIGHT + 2, "Cancel");
         
-        
-        buttonList.add(respecBtn);
+        if(Config.respecEnabled)
+            buttonList.add(respecBtn);
         buttonList.add(confirmBtn);
         buttonList.add(cancelBtn);
         buttonList.add(new GuiButtonExt(-1, guiWidth - 96, top + 4, 100, fontRenderer.FONT_HEIGHT + 2, "Switch Background"));
@@ -166,7 +166,7 @@ public class GuiPrestige extends GuiPrestigeBase {
         for(GuiObjectReward parent : guiObjects.values()) {
             Vec3d start = new Vec3d(parent.getX() + parent.getWidth() / 2, parent.getY() + parent.getHeight() / 2, 0);
             for(Reward child : parent.getReward().getChildren()) {
-                if(child == null){
+                if(child == null) {
                     continue;
                 }
                 GuiObjectReward childObject = getObject(child.getIdentifier());
@@ -298,7 +298,7 @@ public class GuiPrestige extends GuiPrestigeBase {
         
         
         GlStateManager.translate(0, 0, 1000);
-        if(respec) {
+        if(Config.respecEnabled && respec) {
             int padding = 20;
             RenderUtils.drawRect(padding, padding, width - padding, height - padding, 0xAA111111);
             String text = "This action will remove all your unlocked rewards, are you sure you want to do this?";
