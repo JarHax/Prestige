@@ -3,7 +3,10 @@ package com.jarhax.prestige.compat.crt;
 import com.jarhax.prestige.Prestige;
 import crafttweaker.*;
 import crafttweaker.annotations.ZenRegister;
+import crafttweaker.api.potions.IPotionEffect;
+import crafttweaker.mc1120.potions.MCPotionEfect;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.potion.*;
 import stanhebben.zenscript.annotations.*;
 
 import java.util.*;
@@ -30,6 +33,42 @@ public class CRTRewards {
         });
     }
     
+    @ZenMethod
+    public static void registerTickingReward(String name, ITickingReward reward) {
+        CraftTweakerAPI.apply(new IAction() {
+            @Override
+            public void apply() {
+                List<IReward> list = Prestige.REWARDS.getOrDefault(name, new LinkedList<>());
+                list.add(reward);
+                Prestige.REWARDS.put(name, list);
+            }
+            
+            @Override
+            public String describe() {
+                return "Adding ticking reward: " + name + ".";
+            }
+        });
+    }
+    
+    @ZenMethod
+    public static void registerPotionReward(String name, IPotionEffect potion) {
+        CraftTweakerAPI.apply(new IAction() {
+            @Override
+            public void apply() {
+                List<IReward> list = Prestige.REWARDS.getOrDefault(name, new LinkedList<>());
+                list.add((ITickingReward) (world, player) -> {
+                    if(!player.isPotionActive(potion.getPotion()) || player.getActivePotionEffect(potion.getPotion()).getDuration() < Math.ceil(potion.getDuration() / 2))
+                        player.addPotionEffect(new MCPotionEfect(new PotionEffect((Potion) potion.getPotion().getInternal(), potion.getDuration(), potion.getAmplifier(), potion.isAmbient(), potion.doesShowParticles())));
+                });
+                Prestige.REWARDS.put(name, list);
+            }
+            
+            @Override
+            public String describe() {
+                return "Adding potion reward: " + name + ".";
+            }
+        });
+    }
     @ZenMethod
     public static void registerSellAction(String name, ISellAction reward) {
         CraftTweakerAPI.apply(new IAction() {
