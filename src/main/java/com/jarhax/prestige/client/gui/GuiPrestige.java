@@ -17,7 +17,6 @@ import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class GuiPrestige extends GuiPrestigeBase {
     
@@ -132,7 +131,9 @@ public class GuiPrestige extends GuiPrestigeBase {
         
         long sells = Prestige.clientPlayerData.getPrestige();
         for(Reward reward : Prestige.clientPlayerData.getUnlockedRewards()) {
-            sells += reward.getSellPrice();
+            if(reward != null) {
+                sells += reward.getSellPrice();
+            }
         }
         
         long cost = Math.round(sells / 10f);
