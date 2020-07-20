@@ -19,7 +19,7 @@ public class CommandAdd extends Command {
     @Override
     public String getUsage(ICommandSender sender) {
         
-        return "/add <player> <amount> [source-id]";
+        return "/prestige add <player> <amount> [source-id]";
     }
     
     @Override
