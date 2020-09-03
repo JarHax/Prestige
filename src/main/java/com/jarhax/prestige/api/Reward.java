@@ -30,6 +30,10 @@ public class Reward {
     
     @Expose
     private final Set<String> parents = new HashSet<>();
+    
+    @Expose
+    private boolean partialParents = false;
+    
     @Expose
     private final Set<String> children = new HashSet<>();
     /*
@@ -209,5 +213,13 @@ public class Reward {
     
     public void setIcon(String icon) {
         this.icon = icon;
+    }
+    
+    public boolean isPartialParents() {
+        return partialParents;
+    }
+    
+    public void setPartialParents(boolean partialParents) {
+        this.partialParents = partialParents;
     }
 }

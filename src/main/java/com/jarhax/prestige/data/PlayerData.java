@@ -150,15 +150,22 @@ public class PlayerData {
     
     public boolean hasRequiredRewards(Reward reward) {
         
-        for(final Reward parent : reward.getParents()) {
-            
-            if(!this.hasReward(parent)) {
-                
-                return false;
-            }
+        if(reward.getParents().isEmpty()) {
+            return true;
         }
-        
-        return true;
+        if(reward.isPartialParents()) {
+            return reward.getParents().stream().anyMatch(this::hasReward);
+        } else {
+            for(final Reward parent : reward.getParents()) {
+                
+                if(!this.hasReward(parent)) {
+                    
+                    return false;
+                }
+            }
+            
+            return true;
+        }
     }
     
     
