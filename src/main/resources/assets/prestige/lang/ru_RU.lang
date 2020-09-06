@@ -1,0 +1,19 @@
+#Команды
+chat.prestige.confirmed=Очки престижа: %d
+chat.prestige.unlocked=Награды разблокированы: %d
+chat.prestige.hassource.sender=%s уже имеет очки престижа для источника %s.
+chat.prestige.hassource.reciever=У вас уже получен престиж для %s.
+chat.prestige.added.sender=%s получил %d очки престижа!
+chat.prestige.added.reciever=Вы получили %d очки престижа!
+chat.prestige.synced=Ваши данные престижа были синхронизированы!
+chat.prestige.open.reciever=GUI престижа принудительно отображено %s.
+chat.prestige.open.sender=%s's GUI престижа был открыт.
+chat.prestige.clear.sender=Награды очищены для: %s
+chat.prestige.no.player=Игрок не найден для: %s
+chat.prestige.invalid.command=Недопустимое использование команды!
+chat.prestige.open.server=Редактирование награды только в Одиночной игре!
+prestige.key.open=Открыть меню престижа
+prestige.key.category=Престиж
+chat.prestige.disabled=Вы должны быть в мире с включённым престижем, переведено сообществом модовестник, чтобы использовать это меню!
+chat.prestige.force.unknown=Неизвестный параметр "%s"!
+chat.prestige.force.complete=Престиж был вынуждено %s для всех игроков!
