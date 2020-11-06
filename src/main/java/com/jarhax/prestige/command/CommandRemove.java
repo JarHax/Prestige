@@ -18,7 +18,7 @@ public class CommandRemove extends Command {
     @Override
     public String getUsage(ICommandSender sender) {
         
-        return "/remove player <amount> [source]";
+        return "/prestige remove <player> <amount> [source-id]";
     }
     
     @Override

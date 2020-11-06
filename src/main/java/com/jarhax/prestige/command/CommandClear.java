@@ -1,6 +1,5 @@
 package com.jarhax.prestige.command;
 
-import com.jarhax.prestige.api.Reward;
 import com.jarhax.prestige.data.*;
 import net.darkhax.bookshelf.command.Command;
 import net.minecraft.command.*;
@@ -19,7 +18,7 @@ public class CommandClear extends Command {
     @Override
     public String getUsage(ICommandSender sender) {
         
-        return "/remove player clear";
+        return "/prestige clear [player]";
     }
     
     @Override

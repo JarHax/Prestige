@@ -6,19 +6,19 @@ buildscript {
         
         maven { 
         
-            url = 'http://files.minecraftforge.net/maven'
+            url = 'https://files.minecraftforge.net/maven'
         }
-        
+
         maven {
 
-            url 'https://plugins.gradle.org/m2/'
+            url = 'https://plugins.gradle.org/m2/'
         }
     }
     
     dependencies {
     
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-        classpath 'gradle.plugin.com.matthewprenger:CurseGradle:1.1.0'
+        classpath 'gradle.plugin.com.matthewprenger:CurseGradle:1.4.0'
     }
 }
 
@@ -54,19 +54,19 @@ repositories {
 
     maven {
 
-        url "http://maven.mcmoddev.com"
+        url = 'https://maven.mcmoddev.com'
     }
     
     maven {
     
-        url 'http://maven.blamejared.com'
+        url = 'https://maven.blamejared.com'
     }
 }
 
 dependencies {
 
-    deobfProvided "net.darkhax.bookshelf:Bookshelf-1.12.2:${version_bookshelf}"
-    deobfProvided "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-${version_minetweaker}"
+    provided "net.darkhax.bookshelf:Bookshelf-1.12.2:${version_bookshelf}"
+    provided "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-${version_minetweaker}"
 }
 
 processResources {
